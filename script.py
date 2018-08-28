@@ -12,8 +12,7 @@ if __name__ == '__main__':
 
     num_target_present = 4800
     num_target_absent = 4800
-    set_sizes = [3, 6, 12, 18]
-
+    set_sizes = [1, 2, 4, 6, 8]
 
     for set_size in set_sizes:
         num_distractors = set_size - 1
@@ -21,8 +20,8 @@ if __name__ == '__main__':
             filename = ('redvert_v_greenvert_set_size_{}_'
                         'target_present_{}.png'.format(set_size, i))
             filename = os.path.join(output_dir, filename)
-            surface = make_rectangle_stim(num_target=1,
-                                          num_distractor=num_distractors)
+            surface = make_rectangle_stim(set_size=set_size,
+                                          num_target=1)
             pygame.image.save(surface, filename)
 
         num_distractors_target_absent = set_size
@@ -30,6 +29,6 @@ if __name__ == '__main__':
             filename = ('redvert_v_greenvert_set_size_{}_'
                         'target_absent_{}.png'.format(set_size, i))
             filename = os.path.join(output_dir, filename)
-            surface = make_rectangle_stim(num_target=0,
-                                          num_distractor=num_distractors)
+            surface = make_rectangle_stim(set_size=set_size,
+                                          num_target=0)
             pygame.image.save(surface, filename)
