@@ -1,34 +1,85 @@
 import os
+import argparse
+import configparser
+import ast
+import json
 
 import pygame
 
-from visualsearchstim.utils import make_rectangle_stim
+from visualsearchstim.utils import make_rectangle_stim, make_number_stim
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--config',
+                    type=str,
+                    default='config.ini',
+                    help='filename of config file, default is config.ini')
+args = parser.parse_args()
 
 if __name__ == '__main__':
 
-    output_dir = os.path.join('.', 'output')
+    # config parsing boilerplate
+    config = configparser.ConfigParser()
+    config.read(args.config)
+    num_target_present = int(config['config']['num_target_present'])
+    num_target_absent = int(config['config']['num_target_absent'])
+    set_sizes = ast.literal_eval(config['config']['set_sizes'])
+    stimulus = config['config']['stimulus']
+    if config.has_option(section='config',
+                         option='output_dir'):
+        output_dir = config['config']['output_dir']
+        output_dir = os.path.expanduser(output_dir)
+    else:
+        output_dir = os.path.join('.', 'output')
+
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
-    num_target_present = 4800
-    num_target_absent = 4800
-    set_sizes = [1, 2, 4, 6, 8]
+    if config.has_option(section='config',
+                         option='json_filename'):
+        json_filename = os.path.join(output_dir,
+                                     config['config']['json_filename'])
+    else:
+        json_filename = os.path.join(output_dir,
+                                     'filenames_by_set_size_'
+                                     'and_target.json')
+
+    # put filenames in a dict that we save as json
+    # so we don't have to do a bunch of string matching to find them later,
+    # instead we can just get all the filenames for a given set size
+    # with target present or absent
+    # by using appropriate keys
+    # e.g. fnames_set_size_8_target_present = filenames_dict[8]['present']
+    filenames_dict = {}
 
     for set_size in set_sizes:
-        num_distractors = set_size - 1
-        for i in range(num_target_present // len(set_sizes)):
-            filename = ('redvert_v_greenvert_set_size_{}_'
-                        'target_present_{}.png'.format(set_size, i))
-            filename = os.path.join(output_dir, filename)
-            surface = make_rectangle_stim(set_size=set_size,
-                                          num_target=1)
-            pygame.image.save(surface, filename)
+        # add dict for this set size that will have list of "target present / absent" filenames
+        filenames_dict[set_size] = {}
+        for target in ('present', 'absent'):
+            # add the actual filename list for 'present' or 'absent'
+            filenames_dict[set_size][target] = []
+            if target == 'present':
+                inds_of_stim_to_make = range(num_target_present // len(set_sizes))
+                num_target = 1
+            elif target == 'absent':
+                inds_of_stim_to_make = range(num_target_absent // len(set_sizes))
+                num_target = 0
 
-        num_distractors_target_absent = set_size
-        for i in range(num_target_absent // len(set_sizes)):
-            filename = ('redvert_v_greenvert_set_size_{}_'
-                        'target_absent_{}.png'.format(set_size, i))
-            filename = os.path.join(output_dir, filename)
-            surface = make_rectangle_stim(set_size=set_size,
-                                          num_target=0)
-            pygame.image.save(surface, filename)
+            for i in inds_of_stim_to_make:
+                if stimulus == 'rectangle':
+                    filename = ('redvert_v_greenvert_set_size_{}_'
+                                'target_{}_{}.png'.format(set_size, target, i))
+                    surface = make_rectangle_stim(set_size=set_size,
+                                                  num_target=num_target)
+                elif stimulus == 'number':
+                    filename = ('two_v_five_set_size_{}_'
+                                'target_{}_{}.png'.format(set_size, target, i))
+                    surface = make_number_stim(set_size=set_size,
+                                               num_target=num_target)
+                filename = os.path.join(output_dir, filename)
+                pygame.image.save(surface, filename)
+                filenames_dict[set_size][target].append(filename)
+
+    filenames_json = json.dumps(filenames_dict, indent=4)
+    with open(json_filename, 'w') as json_output:
+        print(filenames_json, file=json_output)
