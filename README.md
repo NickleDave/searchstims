@@ -1,7 +1,10 @@
-# make-vis-search-stim-pygame
+# searchstims
 
 Python package to make stimuli like those used in classic visual search experiments.  
 https://en.wikipedia.org/wiki/Visual_search
+
+![efficient_search](redvert_v_greenvert_set_size_4_target_present_55.png)
+![inefficient_search](two_v_five_set_size_6_target_present_78.png)
 
 ## Installation
 Using Anaconda:  
@@ -13,5 +16,5 @@ Using Anaconda:
 ## Usage
 Running the example script will create a folder `./output` with feature
 search stimuli.  
-`(searchstim) $ cd ./make-vis-search-stim-pygame`  
-`(searchstim) $ python script.py`  
+`(searchstim) $ cd ./searchstims`  
+`(searchstim) $ python script.py -c config.ini`  
