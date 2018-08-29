@@ -6,7 +6,7 @@ import json
 
 import pygame
 
-from visualsearchstim.utils import make_rectangle_stim, make_number_stim
+from searchstims.utils import make_rectangle_stim, make_number_stim
 
 
 parser = argparse.ArgumentParser()
