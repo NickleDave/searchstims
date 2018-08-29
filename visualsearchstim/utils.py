@@ -1,4 +1,4 @@
-import sys
+import os
 
 import pygame
 from pygame.locals import *
@@ -13,6 +13,18 @@ colors_dict = {
     'red': (255, 0, 0),
     'green': (0, 255, 0),
     'blue': (0, 0, 255),
+}
+
+png_path = os.path.join(os.path.dirname(__file__),
+                        'png')
+
+numbers_dict = {
+    (2, 'red'): 'two_red.png',
+    (2, 'green'): 'two_green.png',
+    (2, 'white'): 'two_white.png',
+    (5, 'red'): 'five_red.png',
+    (5, 'green'): 'five_green.png',
+    (5, 'white'): 'five_white.png',
 }
 
 
@@ -70,11 +82,9 @@ def make_rectangle_stim(set_size=8,
 
     # find centers of cells we're going to use
     cell_width = round(window_size[0] / grid_size[0])
-    cell_x_end = np.arange(1, grid_size[0] + 1) * cell_width
     cell_x_center = round((window_size[0] / grid_size[0]) / 2)
     xx_to_use_ctr = (xx_to_use * cell_width) - cell_x_center
     cell_height = round(window_size[1] / grid_size[1])
-    cell_y_end = np.arange(1, grid_size[1] + 1) * cell_height
     cell_y_center = round((window_size[1] / grid_size[1]) / 2)
     yy_to_use_ctr = (yy_to_use * cell_height) - cell_y_center
 
@@ -101,7 +111,7 @@ def make_rectangle_stim(set_size=8,
     DISPLAYSURF = pygame.display.set_mode(window_size, 0, 32)
 
     # draw on surface object
-    DISPLAYSURF.fill(BLACK)
+    DISPLAYSURF.fill(colors_dict['black'])
     target_inds = np.random.choice(np.arange(set_size),
                                    size=num_target).tolist()
     rects = []
@@ -123,12 +133,15 @@ def make_rectangle_stim(set_size=8,
 
 def make_number_stim(set_size=8,
                      num_target=1,
-                     target_color='red',
-                     distractor_color='green',
+                     target_number=2,
+                     distractor_number=5,
+                     target_color='white',
+                     distractor_color='white',
                      grid_size=(5, 5),
                      window_size=(227, 227),
+                     rects_width_height=(30, 30),
                      jitter=5):
-    """make visual search stimuli with rectangles"""
+    """make visual search stimuli with numbers"""
     if type(set_size) != int:
         raise TypeError('set size must be an integer')
 
@@ -174,11 +187,9 @@ def make_number_stim(set_size=8,
 
     # find centers of cells we're going to use
     cell_width = round(window_size[0] / grid_size[0])
-    cell_x_end = np.arange(1, grid_size[0] + 1) * cell_width
     cell_x_center = round((window_size[0] / grid_size[0]) / 2)
     xx_to_use_ctr = (xx_to_use * cell_width) - cell_x_center
     cell_height = round(window_size[1] / grid_size[1])
-    cell_y_end = np.arange(1, grid_size[1] + 1) * cell_height
     cell_y_center = round((window_size[1] / grid_size[1]) / 2)
     yy_to_use_ctr = (yy_to_use * cell_height) - cell_y_center
 
@@ -205,20 +216,27 @@ def make_number_stim(set_size=8,
     DISPLAYSURF = pygame.display.set_mode(window_size, 0, 32)
 
     # draw on surface object
-    DISPLAYSURF.fill(BLACK)
+    DISPLAYSURF.fill(colors_dict['black'])
     target_inds = np.random.choice(np.arange(set_size),
                                    size=num_target).tolist()
 
+    target_png = os.path.join(png_path,
+                              numbers_dict[(target_number,target_color)])
+    target = pygame.image.load(target_png)
+    distractor_png = os.path.join(png_path,
+                                  numbers_dict[(distractor_number,distractor_color)])
+    distractor = pygame.image.load(distractor_png)
+
+    rects = []
     for item in range(set_size):
         rect_tuple = (0, 0) + rects_width_height
         rect_to_draw = Rect(rect_tuple)
-        rect_to_draw.center = (xx_to_use_ctr[item], yy_to_use_ctr[item])
+        rect_to_draw.center = (xx_to_use_ctr[item],
+                               yy_to_use_ctr[item])
         if item in target_inds:
-            curr_rect = pygame.draw.rect(DISPLAYSURF, target_color,
-                                         rect_to_draw)
+            curr_rect = DISPLAYSURF.blit(target, rect_to_draw)
         else:
-            curr_rect = pygame.draw.rect(DISPLAYSURF, distractor_color,
-                                         rect_to_draw)
+            curr_rect = DISPLAYSURF.blit(distractor, rect_to_draw)
         rects.append(curr_rect)
 
     pygame.display.update()
