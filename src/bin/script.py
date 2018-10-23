@@ -1,13 +1,12 @@
-import os
 import argparse
-import configparser
 import ast
+import configparser
 import json
+import os
 
 import pygame
 
-from searchstims.utils import make_rectangle_stim, make_number_stim
-
+from src.searchstims.utils import make_rectangle_stim, make_number_stim
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config',
