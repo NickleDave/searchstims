@@ -3,9 +3,9 @@ import os
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'visualsearchstim'
-DESCRIPTION = 'Python package that generates images like the stimuli used in visual search experiments'
-URL = 'https://github.com/NickleDave/make-vis-search-stim-pygame'
+NAME = 'searchstims'
+DESCRIPTION = 'generate images like the stimuli used in visual search experiments'
+URL = 'https://github.com/NickleDave/searchstims'
 EMAIL = 'nicholdav at gmail dot com'
 AUTHOR = 'David Nicholson'
 
@@ -24,10 +24,8 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    packages=find_packages(exclude=('tests',)),
-    # If your package is a single module, use this instead of 'packages':
-    # py_modules=['mypackage'],
-
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     # entry_points={
     #     'console_scripts': ['mycli=mymodule:cli'],
     # },
@@ -38,6 +36,7 @@ setup(
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         'License :: OSI Approved :: BSD License',
+        'Development Status :: 3 - Alpha',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
@@ -45,7 +44,6 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy'
     ],
 
 )
