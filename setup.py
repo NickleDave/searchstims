@@ -1,6 +1,6 @@
 import os
 
-from setuptools import find_packages, setup, Command
+from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = 'main.py'
