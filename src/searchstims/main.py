@@ -6,7 +6,8 @@ import os
 
 import pygame
 
-from searchstims.make import make_rectangle_stim, make_number_stim
+import searchstims
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config',
@@ -15,8 +16,8 @@ parser.add_argument('-c', '--config',
                     help='filename of config file, default is config.ini')
 args = parser.parse_args()
 
-if __name__ == '__main__':
 
+def main():
     # config parsing boilerplate
     config = configparser.ConfigParser()
     config.read(args.config)
@@ -50,6 +51,10 @@ if __name__ == '__main__':
     # by using appropriate keys
     # e.g. fnames_set_size_8_target_present = filenames_dict[8]['present']
     filenames_dict = {}
+    if stimulus == 'rectangle':
+        stim_maker = searchstims.RectangleStimMaker()
+    elif stimulus == 'number':
+        stim_maker = searchstims.NumberStimMaker()
 
     for set_size in set_sizes:
         # add dict for this set size that will have list of "target present / absent" filenames
@@ -68,13 +73,11 @@ if __name__ == '__main__':
                 if stimulus == 'rectangle':
                     filename = ('redvert_v_greenvert_set_size_{}_'
                                 'target_{}_{}.png'.format(set_size, target, i))
-                    surface = make_rectangle_stim(set_size=set_size,
-                                                  num_target=num_target)
                 elif stimulus == 'number':
                     filename = ('two_v_five_set_size_{}_'
                                 'target_{}_{}.png'.format(set_size, target, i))
-                    surface = make_number_stim(set_size=set_size,
-                                               num_target=num_target)
+                    surface = stim_maker.make_stim(set_size=set_size,
+                                                   num_target=num_target)
                 filename = os.path.join(output_dir, filename)
                 pygame.image.save(surface, filename)
                 filenames_dict[set_size][target].append(filename)
@@ -82,3 +85,6 @@ if __name__ == '__main__':
     filenames_json = json.dumps(filenames_dict, indent=4)
     with open(json_filename, 'w') as json_output:
         print(filenames_json, file=json_output)
+
+if __name__ == '__main__':
+    main()

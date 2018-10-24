@@ -3,9 +3,9 @@ import os
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'searchstims'
+NAME = 'main.py'
 DESCRIPTION = 'generate images like the stimuli used in visual search experiments'
-URL = 'https://github.com/NickleDave/searchstims'
+URL = 'https://github.com/NickleDave/main.py'
 EMAIL = 'nicholdav at gmail dot com'
 AUTHOR = 'David Nicholson'
 
@@ -27,9 +27,9 @@ setup(
     url=URL,
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    # entry_points={
-    #     'console_scripts': ['mycli=mymodule:cli'],
-    # },
+    entry_points={
+        'console_scripts': ['searchstims=searchstims.main:main'],
+    },
     install_requires=REQUIRED,
     include_package_data=True,
     license='BSD-3',
@@ -46,5 +46,4 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
-
 )

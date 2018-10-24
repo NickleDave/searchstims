@@ -19,8 +19,6 @@ colors_dict = {
 class AbstractStimMaker:
     """parent class for all StimMaker classes"""
     def __init__(self,
-                 set_size=8,
-                 num_target=1,
                  target_color='red',
                  distractor_color='green',
                  grid_size=(5, 5),
@@ -48,8 +46,6 @@ class AbstractStimMaker:
         if not all([grid_size_el > 0 for grid_size_el in grid_size]):
             raise ValueError('values for grid size must be positive integers')
 
-        self.set_size = set_size
-        self.num_target = num_target
         self.target_color = target_color
         self.distractor_color = distractor_color
         self.grid_size = grid_size
@@ -63,14 +59,17 @@ class AbstractStimMaker:
         the stimulus."""
         raise NotImplementedError
 
-    def make_stim(self):
+    def make_stim(self,
+                  set_size=8,
+                  num_target=1,
+                  ):
         """make visual search stimuli with rectangles"""
 
         total_grid_elements = self.grid_size[0] * self.grid_size[1]
-        if self.set_size > total_grid_elements:
+        if set_size > total_grid_elements:
             raise ValueError('set size {} cannot be greater than number of '
                              'elements in grid, {}'
-                             .format(self.set_size, total_grid_elements))
+                             .format(set_size, total_grid_elements))
 
         if type(self.jitter) != int:
             raise TypeError('value for jitter must be an integer')
@@ -83,7 +82,7 @@ class AbstractStimMaker:
         yy = yy.ravel()
         num_cells = self.grid_size[0] * self.grid_size[1]
         cells_to_use = sorted(np.random.choice(np.arange(num_cells),
-                                               size=self.set_size,
+                                               size=set_size,
                                                replace=False))
         xx_to_use = xx[cells_to_use]
         yy_to_use = yy[cells_to_use]
@@ -120,10 +119,10 @@ class AbstractStimMaker:
 
         # draw on surface object
         display_surface.fill(colors_dict['black'])
-        target_inds = np.random.choice(np.arange(self.set_size),
-                                       size=self.num_target).tolist()
+        target_inds = np.random.choice(np.arange(set_size),
+                                       size=num_target).tolist()
         rects = []
-        for item in range(self.set_size):
+        for item in range(set_size):
             rect_tuple = (0, 0) + self.rects_width_height
             rect_to_draw = Rect(rect_tuple)
             rect_to_draw.center = (xx_to_use_ctr[item], yy_to_use_ctr[item])
@@ -164,19 +163,15 @@ class NumberStimMaker(AbstractStimMaker):
     }
 
     def __init__(self,
-                 set_size=8,
-                 num_target=1,
-                 target_number=2,
-                 distractor_number=5,
                  target_color='white',
                  distractor_color='white',
                  grid_size=(5, 5),
                  window_size=(227, 227),
                  rects_width_height=(30, 30),
-                 jitter=5):
-        super().__init__(set_size,
-                         num_target,
-                         target_color,
+                 jitter=5,
+                 target_number=2,
+                 distractor_number=5):
+        super().__init__(target_color,
                          distractor_color,
                          grid_size,
                          window_size,
