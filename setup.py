@@ -3,10 +3,10 @@ import os
 from setuptools import find_packages, setup
 
 # Package meta-data.
-NAME = 'main.py'
+NAME = 'searchstims'
 DESCRIPTION = 'generate images like the stimuli used in visual search experiments'
 URL = 'https://github.com/NickleDave/main.py'
-EMAIL = 'nicholdav at gmail dot com'
+EMAIL = 'nicholdav@gmail.com'
 AUTHOR = 'David Nicholson'
 VERSION = '0.1'
 KEYWORDS = ['visual search', 'pygame']
