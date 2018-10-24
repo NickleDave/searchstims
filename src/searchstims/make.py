@@ -25,21 +25,6 @@ class AbstractStimMaker:
                  window_size=(227, 227),
                  rects_width_height=(10, 30),
                  jitter=5):
-        if type(set_size) != int:
-            raise TypeError('set size must be an integer')
-
-        if not set_size > 0:
-            raise ValueError('set size must be greater than zero')
-
-        if type(num_target) != int:
-            raise TypeError('number of targets must be an integer')
-
-        if not num_target >= 0:
-            raise ValueError('number of targets must be greater than or equal to zero')
-
-        if num_target > set_size:
-            raise ValueError('number of targets cannot be greater than set size')
-
         if not all([type(grid_size_el) == int for grid_size_el in grid_size]):
             raise ValueError('values for grid size must be positive integers')
 
@@ -64,6 +49,20 @@ class AbstractStimMaker:
                   num_target=1,
                   ):
         """make visual search stimuli with rectangles"""
+        if type(set_size) != int:
+            raise TypeError('set size must be an integer')
+
+        if not set_size > 0:
+            raise ValueError('set size must be greater than zero')
+
+        if type(num_target) != int:
+            raise TypeError('number of targets must be an integer')
+
+        if not num_target >= 0:
+            raise ValueError('number of targets must be greater than or equal to zero')
+
+        if num_target > set_size:
+            raise ValueError('number of targets cannot be greater than set size')
 
         total_grid_elements = self.grid_size[0] * self.grid_size[1]
         if set_size > total_grid_elements:
