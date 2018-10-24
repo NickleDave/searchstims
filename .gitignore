@@ -2,3 +2,4 @@
 output/
 __pycache__/
 ./visualsearchstim/__pycache__/
+*egg-info
