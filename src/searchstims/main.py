@@ -6,8 +6,7 @@ import os
 
 import pygame
 
-import searchstims
-
+import searchstims.make
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config',
@@ -52,9 +51,9 @@ def main():
     # e.g. fnames_set_size_8_target_present = filenames_dict[8]['present']
     filenames_dict = {}
     if stimulus == 'rectangle':
-        stim_maker = searchstims.RectangleStimMaker()
+        stim_maker = searchstims.make.RectangleStimMaker()
     elif stimulus == 'number':
-        stim_maker = searchstims.NumberStimMaker()
+        stim_maker = searchstims.make.NumberStimMaker()
 
     for set_size in set_sizes:
         # add dict for this set size that will have list of "target present / absent" filenames
