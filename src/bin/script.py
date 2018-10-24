@@ -6,7 +6,7 @@ import os
 
 import pygame
 
-from src.searchstims.utils import make_rectangle_stim, make_number_stim
+from searchstims.make import make_rectangle_stim, make_number_stim
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config',

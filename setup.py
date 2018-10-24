@@ -12,6 +12,7 @@ AUTHOR = 'David Nicholson'
 # What packages are required for this module to be executed?
 REQUIRED = [
     'pygame',
+    'numpy',
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
