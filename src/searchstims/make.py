@@ -17,14 +17,39 @@ colors_dict = {
 
 
 class AbstractStimMaker:
-    """parent class for all StimMaker classes"""
+    """parent class for all StimMaker classes
+    """
     def __init__(self,
                  target_color='red',
                  distractor_color='green',
-                 grid_size=(5, 5),
                  window_size=(227, 227),
+                 grid_size=(5, 5),
                  rects_width_height=(10, 30),
                  jitter=5):
+        """__init__ function for Stim Makers
+
+        Parameters
+        ----------
+        target_color : str
+            {'red', 'green', 'white', 'blue'}. Default is 'red'.
+        distractor_color : str
+            {'red', 'green', 'white', 'blue'}. Default is 'green'.
+        window_size : tuple
+            of length two, representing (width, height) of window in pixels.
+        grid_size : tuple
+            of length two, representing the number of (rows, columns)
+            in the grid on which tareget and distractors will be located.
+        rects_width_height : tuple
+            shape of pygame Rect objects that will be plotted on grid,
+            (width, height) in pixels. Default is (10, 30).
+        jitter : int
+            number of pixels to jitter each 'item' in the 'set'
+            that will be plotted on the grid. Default is 5.
+            Adding jitter is helpful for creating stimuli with the
+            same set size but slightly different placements, e.g. for
+            augmenting data to train a learning algorithm and encourage
+            invariant representations.
+        """
         if not all([type(grid_size_el) == int for grid_size_el in grid_size]):
             raise ValueError('values for grid size must be positive integers')
 
@@ -48,7 +73,21 @@ class AbstractStimMaker:
                   set_size=8,
                   num_target=1,
                   ):
-        """make visual search stimuli with rectangles"""
+        """make visual search stimuli
+
+        Parameters
+        ----------
+        set_size : int
+            Set size, equal to number of targets + distractors.
+            Default is 8.
+        num_target : int
+            Number of targets. Default is 1.
+
+        Returns
+        -------
+        display_surface : pygame.Surface
+            with visual search stimuli plotted on it
+        """
         if type(set_size) != int:
             raise TypeError('set size must be an integer')
 
@@ -138,7 +177,9 @@ class AbstractStimMaker:
 
 
 class RectangleStimMaker(AbstractStimMaker):
-    """make visual search stimuli with rectangles"""
+    """Make visual search stimuli with vertical rectangles
+    where target is different color form distractor.
+    Considered a stimulus that allows for 'efficient' search."""
     def _return_rect_for_stim(self, display_surface, rect_to_draw, is_target):
         if is_target:
             color = self.target_color
@@ -149,7 +190,8 @@ class RectangleStimMaker(AbstractStimMaker):
 
 
 class NumberStimMaker(AbstractStimMaker):
-    """make visual search stimuli with numbers"""
+    """Make visual search stimuli with digital 2s and 5s.
+    Considered a stimulus that results in 'inefficient' search."""
     png_path = os.path.join(os.path.dirname(__file__), 'png')
 
     numbers_dict = {
@@ -170,12 +212,22 @@ class NumberStimMaker(AbstractStimMaker):
                  jitter=5,
                  target_number=2,
                  distractor_number=5):
-        super().__init__(target_color,
-                         distractor_color,
-                         grid_size,
-                         window_size,
-                         rects_width_height,
-                         jitter)
+        """
+        Other Parameters
+        ----------------
+        target_number : int
+            Number that is used as target.
+            one of {2, 5}. Default is 2.
+        distractor_number : int
+            Number that is used as a distractor.
+            one of {2, 5}. Default is 5.
+        """
+        super().__init__(target_color=target_color,
+                         distractor_color=distractor_color,
+                         window_size=window_size,
+                         grid_size=grid_size,
+                         rects_width_height=rects_width_height,
+                         jitter=jitter)
         self.target_number = target_number
         self.distractor_number = distractor_number
         self.target_png = os.path.join(self.png_path,
@@ -188,6 +240,7 @@ class NumberStimMaker(AbstractStimMaker):
         self.distractor = pygame.image.load(self.distractor_png)
 
     def _return_rect_for_stim(self, display_surface, rect_to_draw, is_target):
+        """Returns target or distractor"""
         if is_target:
             rect = display_surface.blit(self.target, rect_to_draw)
         else:
