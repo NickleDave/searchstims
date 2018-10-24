@@ -32,6 +32,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
+    keywords=KEYWORDS,
     packages=find_packages('src'),
     package_dir={'': 'src'},
     entry_points={
