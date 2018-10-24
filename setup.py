@@ -8,6 +8,8 @@ DESCRIPTION = 'generate images like the stimuli used in visual search experiment
 URL = 'https://github.com/NickleDave/main.py'
 EMAIL = 'nicholdav at gmail dot com'
 AUTHOR = 'David Nicholson'
+VERSION = '0.1'
+KEYWORDS = ['visual search', 'pygame']
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -19,7 +21,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name=NAME,
-    #version=about['__version__'],
+    version=VERSION,
     description=DESCRIPTION,
     # long_description=long_description,
     author=AUTHOR,
