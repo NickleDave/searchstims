@@ -8,15 +8,18 @@ import pygame
 
 import searchstims.make
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--config',
-                    type=str,
-                    default='config.ini',
-                    help='filename of config file, default is config.ini')
-args = parser.parse_args()
-
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config',
+                        type=str,
+                        help=('filename of config file. '
+                              'For an example config.ini file, see: '
+                              'https://github.com/NickleDave/searchstims'))
+    args = parser.parse_args()
+    config_file = args.config
+    if not os.path.isfile(config_file):
+        raise FileNotFoundError("Config file {} not found".format(config_file))
     # config parsing boilerplate
     config = configparser.ConfigParser()
     config.read(args.config)
