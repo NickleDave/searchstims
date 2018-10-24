@@ -39,6 +39,7 @@ setup(
         'console_scripts': ['searchstims=searchstims.main:main'],
     },
     install_requires=REQUIRED,
+    python_requires='>=3',
     include_package_data=True,
     license='BSD-3',
     classifiers=[
