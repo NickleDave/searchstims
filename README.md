@@ -1,10 +1,14 @@
 # searchstims
 
-Python package to make stimuli like those used in classic visual search experiments.  
+Python package to make stimuli like those used in classic visual search experiments  
 https://en.wikipedia.org/wiki/Visual_search
+... but with the exact size to feed them to your favorite neural network.
 
 ![efficient_search](redvert_v_greenvert_set_size_4_target_present_55.png)
 ![inefficient_search](two_v_five_set_size_6_target_present_78.png)
+
+For a recent review of factors influencing visual search, please see:  
+http://search.bwh.harvard.edu/new/pubs/FiveFactors_Wolfe-Horowitz_2017.pdf
 
 ## Installation
 `pip install searchstims`
