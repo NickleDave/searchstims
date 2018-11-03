@@ -1,7 +1,7 @@
 # searchstims
 
 Python package to make stimuli like those used in classic visual search experiments  
-https://en.wikipedia.org/wiki/Visual_search
+https://en.wikipedia.org/wiki/Visual_search  
 ... but with the exact size to feed them to your favorite neural network.
 
 ![efficient_search](redvert_v_greenvert_set_size_4_target_present_55.png)
