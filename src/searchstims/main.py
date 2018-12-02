@@ -6,23 +6,23 @@ import os
 
 import pygame
 
-import searchstims.make
+from . import stim_makers
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config',
-                        type=str,
-                        help=('filename of config file. '
-                              'For an example config.ini file, see: '
-                              'https://github.com/NickleDave/searchstims'))
-    args = parser.parse_args()
-    config_file = args.config
-    if not os.path.isfile(config_file):
-        raise FileNotFoundError("Config file {} not found".format(config_file))
-    # config parsing boilerplate
-    config = configparser.ConfigParser()
-    config.read(args.config)
+def make(config):
+    """actual function that makes all the stimuli
+
+    Parameters
+    ----------
+    config : configparser.ConfigParser
+        that already has a config.ini file loaded using the read method
+
+    Returns
+    -------
+    None
+
+    saves all the stimuli to config['config']['output_dir']
+    """
     num_target_present = int(config['config']['num_target_present'])
     num_target_absent = int(config['config']['num_target_absent'])
     set_sizes = ast.literal_eval(config['config']['set_sizes'])
@@ -54,9 +54,9 @@ def main():
     # e.g. fnames_set_size_8_target_present = filenames_dict[8]['present']
     filenames_dict = {}
     if stimulus == 'rectangle':
-        stim_maker = searchstims.make.RectangleStimMaker()
+        stim_maker = stim_makers.RectangleStimMaker()
     elif stimulus == 'number':
-        stim_maker = searchstims.make.NumberStimMaker()
+        stim_maker = stim_makers.NumberStimMaker()
 
     for set_size in set_sizes:
         # add dict for this set size that will have list of "target present / absent" filenames
@@ -87,6 +87,24 @@ def main():
     filenames_json = json.dumps(filenames_dict, indent=4)
     with open(json_filename, 'w') as json_output:
         print(filenames_json, file=json_output)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config',
+                        type=str,
+                        help=('filename of config file. '
+                              'For an example config.ini file, see: '
+                              'https://github.com/NickleDave/searchstims'))
+    args = parser.parse_args()
+    config_file = args.config
+    if not os.path.isfile(config_file):
+        raise FileNotFoundError("Config file {} not found".format(config_file))
+    # config parsing boilerplate
+    config = configparser.ConfigParser()
+    config.read(args.config)
+    make(config)
+
 
 if __name__ == '__main__':
     main()
