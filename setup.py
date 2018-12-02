@@ -22,8 +22,9 @@ DESCRIPTION = 'generate images like the stimuli used in visual search experiment
 URL = 'https://github.com/NickleDave/main.py'
 EMAIL = 'nicholdav@gmail.com'
 AUTHOR = 'David Nicholson'
+REQUIRES_PYTHON = '>=3.6.0'
 VERSION = '0.1.1a1'
-KEYWORDS = ['visual search', 'pygame']
+LICENSE = 'BSD'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -31,11 +32,6 @@ REQUIRED = [
     'numpy',
 ]
 
-here = os.path.abspath(os.path.dirname(__file__))
-
-# Get the long description from the README file
-with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
 
 # this is here so that the .travis.yml script can install
 # dependencies just for the tests by running
