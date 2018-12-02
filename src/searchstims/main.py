@@ -118,8 +118,8 @@ def make(config_tuple):
                 elif config_tuple.stimulus == 'number':
                     filename = ('two_v_five_set_size_{}_'
                                 'target_{}_{}.png'.format(set_size, target, i))
-                    surface = stim_maker.make_stim(set_size=set_size,
-                                                   num_target=num_target)
+                surface = stim_maker.make_stim(set_size=set_size,
+                                               num_target=num_target)
                 filename = os.path.join(config_tuple.output_dir, filename)
                 pygame.image.save(surface, filename)
                 filenames_dict[set_size][target].append(filename)
