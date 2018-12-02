@@ -1,2 +1,2 @@
-from .make import RectangleStimMaker, NumberStimMaker
+from .stim_makers import RectangleStimMaker, NumberStimMaker
 from . import main
