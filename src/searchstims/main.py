@@ -57,9 +57,13 @@ def parse_config(config_file):
 
     if config.has_option(section='config',
                          option='json_filename'):
-        json_filename = os.path.join(output_dir,
-                                     config['config']['json_filename'])
+        if os.path.split(config['config']['json_filename'])[0] == '':
+            json_filename = os.path.join(output_dir,
+                                         config['config']['json_filename'])
+        else:
+            json_filename = config['config']['json_filename']
     else:
+        # default filename if option not used
         json_filename = os.path.join(output_dir,
                                      'filenames_by_set_size_'
                                      'and_target.json')
@@ -101,6 +105,13 @@ def make(config_tuple):
     for set_size in config_tuple.set_sizes:
         # add dict for this set size that will have list of "target present / absent" filenames
         filenames_dict[set_size] = {}
+
+        if not os.path.isdir(
+            os.path.join(config_tuple.output_dir, str(set_size))
+        ):
+            os.makedirs(
+                os.path.join(config_tuple.output_dir, str(set_size))
+            )
         for target in ('present', 'absent'):
             # add the actual filename list for 'present' or 'absent'
             filenames_dict[set_size][target] = []
@@ -111,6 +122,11 @@ def make(config_tuple):
                 inds_of_stim_to_make = range(config_tuple.num_target_absent // len(config_tuple.set_sizes))
                 num_target = 0
 
+            if not os.path.isdir(
+                    os.path.join(config_tuple.output_dir, str(set_size), target)
+            ):
+                os.makedirs(os.path.join(config_tuple.output_dir, str(set_size), target))
+
             for i in inds_of_stim_to_make:
                 if config_tuple.stimulus == 'rectangle':
                     filename = ('redvert_v_greenvert_set_size_{}_'
@@ -120,7 +136,10 @@ def make(config_tuple):
                                 'target_{}_{}.png'.format(set_size, target, i))
                 surface = stim_maker.make_stim(set_size=set_size,
                                                num_target=num_target)
-                filename = os.path.join(config_tuple.output_dir, filename)
+                filename = os.path.join(config_tuple.output_dir,
+                                        str(set_size),
+                                        target,
+                                        filename)
                 pygame.image.save(surface, filename)
                 filenames_dict[set_size][target].append(filename)
 
