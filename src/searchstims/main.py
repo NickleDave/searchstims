@@ -20,13 +20,14 @@ class ConfigTuple(NamedTuple):
     json_filename: str
 
 
-def parse_config(config_file):
-    """parse config; convert strings to correct types
+def parse_config(config):
+    """parse config; convert string value for each option to correct type
 
     Parameters
     ----------
-    config_file : str
-        filename of a config.ini file
+    config : configparser.ConfigParser
+        instance with config.ini file already read into it,
+        using ConfigParser.read method
 
     Returns
     -------
@@ -39,8 +40,6 @@ def parse_config(config_file):
             output_dir: str
             json_filename: str
     """
-    config = configparser.ConfigParser()
-    config.read(config_file)
     num_target_present = int(config['config']['num_target_present'])
     num_target_absent = int(config['config']['num_target_absent'])
     set_sizes = ast.literal_eval(config['config']['set_sizes'])
@@ -159,7 +158,9 @@ def main():
     config_file = args.config
     if not os.path.isfile(config_file):
         raise FileNotFoundError("Config file {} not found".format(config_file))
-    config_tuple = parse_config(config_file)
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    config_tuple = parse_config(config)
     make(config_tuple)
 
 
