@@ -7,13 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.1a1] - 2018-12-02
 ### Added
 - More detail about `config.ini` to README.md, explains what the options actually are for
+- unit tests
 
 ### Changed
-- separate `main.py` into `main` function and `make` function, to separate concerns; 
-the `main` function deals with command-line parsing and `config.ini` file loading, whereas 
-the `make` function just accepts the already-loaded config. That way you can call the 
-`make` function with a `ConfigParser` instance regardless of its origins (e.g. if you need 
-to write tests for `make` )
+- separate `main.py` into functions, to separate concerns; 
+  * the `main` function deals with command-line args
+  * `parse_config` loads and parses `config.ini` files 
+  * `make` function accepts parsed config
+  * This way you can call the `make` function with a `ConfigTuple` instance
+   regardless of its origins (e.g. if you need to write tests for `make` )
+
+### Fixed
+- indent error in `main.py` that caused crash when `stimulus = rectangle`
 
 ## [0.1] - 2018-10-24
 ### Added
