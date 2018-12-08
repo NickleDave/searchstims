@@ -39,6 +39,8 @@ def parse(config_file=None, config=None):
                         'unclear which to use.')
 
     if config_file:
+        if not os.path.isfile(config_file):
+            raise FileNotFoundError(f'config_file {config_file} not found')
         config = configparser.ConfigParser()
         config.read(config_file)
 
