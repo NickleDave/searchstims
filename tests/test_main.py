@@ -22,9 +22,6 @@ class TestMain(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp_output_dir)
 
-    def test_parse_config(self):
-
-
     def test_make_number(self):
         config = ConfigParser()
         config.add_section('config')
