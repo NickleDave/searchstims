@@ -7,7 +7,8 @@ import shutil
 from configparser import ConfigParser
 import unittest
 
-import searchstims.make
+from searchstims.config import parse
+from searchstims.make import make
 
 
 HERE = os.path.dirname(__file__)
@@ -25,24 +26,26 @@ class TestMain(unittest.TestCase):
     def test_make_number(self):
         config = ConfigParser()
         config.add_section('general')
-        config['config']['num_target_present'] = '25'
-        config['num_target_absent'] = '25'
-        config['set_sizes'] = ''[1, 2, 4, 6, 8]''
-        config['output_dir'] = self.tmp_output_dir
-        config['json_filename'] = 'filenames_by_set_size_and_target.json'
-        config['stimulus'] = 'number'
-        searchstims.make(config)
+        config['general']['num_target_present'] = '25'
+        config['general']['num_target_absent'] = '25'
+        config['general']['set_sizes'] = '[1, 2, 4, 6, 8]'
+        config['general']['output_dir'] = self.tmp_output_dir
+        config['general']['json_filename'] = 'filenames_by_set_size_and_target.json'
+        config['general']['stimulus'] = 'number'
+        config_tup = parse(config=config)
+        make(config_tup)
 
     def test_make_rectangle(self):
         config = ConfigParser()
         config.add_section('general')
-        config['config']['num_target_present'] = '25'
-        config['num_target_absent'] = '25'
-        config['set_sizes'] = '[1, 2, 4, 6, 8]'
-        config['output_dir'] = self.tmp_output_dir
-        config['json_filename'] = 'filenames_by_set_size_and_target.json'
-        config['stimulus'] = 'rectangle'
-        searchstims.make(config)
+        config['general']['num_target_present'] = '25'
+        config['general']['num_target_absent'] = '25'
+        config['general']['set_sizes'] = '[1, 2, 4, 6, 8]'
+        config['general']['output_dir'] = self.tmp_output_dir
+        config['general']['json_filename'] = 'filenames_by_set_size_and_target.json'
+        config['general']['stimulus'] = 'rectangle'
+        config_tup = parse(config=config)
+        make(config_tup)
 
 
 if __name__ == '__main__':
