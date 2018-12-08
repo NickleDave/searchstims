@@ -1,3 +1,4 @@
+import os
 import json
 import pygame
 
@@ -18,8 +19,8 @@ def make(config_tuple):
 
     saves all the stimuli to config_tuple.output_dir
     """
-    if not os.path.isdir(config_tuple.output_dir):
-        os.makedirs(config_tuple.output_dir)
+    if not os.path.isdir(config_tuple.general.output_dir):
+        os.makedirs(config_tuple.general.output_dir)
     # put filenames in a dict that we save as json
     # so we don't have to do a bunch of string matching to find them later,
     # instead we can just get all the filenames for a given set size
@@ -67,7 +68,7 @@ def make(config_tuple):
                                 'target_{}_{}.png'.format(set_size, target, i))
                 surface = stim_maker.make_stim(set_size=set_size,
                                                num_target=num_target)
-                filename = os.path.join(config_tuple.output_dir,
+                filename = os.path.join(general_config.output_dir,
                                         str(set_size),
                                         target,
                                         filename)
@@ -75,5 +76,5 @@ def make(config_tuple):
                 filenames_dict[set_size][target].append(filename)
 
     filenames_json = json.dumps(filenames_dict, indent=4)
-    with open(config_tuple.json_filename, 'w') as json_output:
+    with open(general_config.json_filename, 'w') as json_output:
         print(filenames_json, file=json_output)
