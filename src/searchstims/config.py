@@ -10,47 +10,57 @@ config_types = configparser.ConfigParser()
 config_types.read(os.path.join(this_file_dir, 'types.ini'))
 
 
-def parse(config=None):
+def parse(config_file=None, config=None):
     """read config.ini file with config parser,
     returns namedtuple ConfigTuple with
     sections and options as attributes.
 
     Parameters
     ----------
-    config : str
+    config_file : str
         Path to a config.ini file. If None, the
         default configuration is returned.
         Default is None.
+    config: configparser.ConfigParser
+        instance of ConfigParser that already has sections and options declared.
+        This parameter is mainly used in testing, to write tests where the options
+        are explicit in that file.
 
     Returns
     -------
-    config : namedtuple
+    config_tuple : namedtuple
         where fields are sections of the config, and
         values for those fields are also namedtuples,
         with fields being options and values being the
         values for those options from the config.ini file.
     """
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    if config.has_option(section='config',
-                         option='output_dir'):
-        output_dir = config['config']['output_dir']
-        config['config']['output_dir'] = os.path.expanduser(output_dir)
-    else:
-        config['config']['output_dir'] = os.path.join('.', 'output')
+    if config_file and config:
+        raise TypeError('cannot call parse function with config_file and config, '
+                        'unclear which to use.')
 
-    if config.has_option(section='config',
+    if config_file:
+        config = configparser.ConfigParser()
+        config.read(config_file)
+
+    if config.has_option(section='general',
+                         option='output_dir'):
+        output_dir = config['general']['output_dir']
+        config['general']['output_dir'] = os.path.expanduser(output_dir)
+    else:
+        config['general']['output_dir'] = os.path.join('.', 'output')
+
+    if config.has_option(section='general',
                          option='json_filename'):
-        if os.path.split(config['config']['json_filename'])[0] == '':
-            config['config']['json_filename'] = os.path.join(output_dir,
-                                                             config['config']['json_filename'])
+        if os.path.split(config['general']['json_filename'])[0] == '':
+            config['general']['json_filename'] = os.path.join(output_dir,
+                                                             config['general']['json_filename'])
         else:
-            config['config']['json_filename'] = config['config']['json_filename']
+            config['general']['json_filename'] = config['general']['json_filename']
     else:
         # default filename if option not used
-        config['config']['json_filename'] = os.path.join(output_dir,
-                                                         'filenames_by_set_size_'
-                                                         'and_target.json')
+        config['general']['json_filename'] = os.path.join(output_dir,
+                                                          'filenames_by_set_size_'
+                                                          'and_target.json')
 
     # fancy way of turning ConfigParser instance into a namedtuple
     sections = [key for key in list(config.keys()) if key != 'DEFAULT']
