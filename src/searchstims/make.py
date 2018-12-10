@@ -50,6 +50,7 @@ def make(config_tuple):
                                                  distractor_number=init_config.distractor_number
                                                  )
 
+    general_config = config_tuple.general
     for set_size in general_config.set_sizes:
         # add dict for this set size that will have list of "target present / absent" filenames
         filenames_dict[set_size] = {}
@@ -78,10 +79,10 @@ def make(config_tuple):
             for i in inds_of_stim_to_make:
                 surface = stim_maker.make_stim(set_size=set_size,
                                                num_target=num_target)
-                if general_config.stimulus == 'rectangle':
+                if hasattr(config_tuple, 'rectangle'):
                     filename = ('redvert_v_greenvert_set_size_{}_'
                                 'target_{}_{}.png'.format(set_size, target, i))
-                elif general_config.stimulus == 'number':
+                elif hasattr(config_tuple, 'number'):
                     filename = ('two_v_five_set_size_{}_'
                                 'target_{}_{}.png'.format(set_size, target, i))
                 filename = os.path.join(general_config.output_dir,
