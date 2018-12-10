@@ -6,8 +6,10 @@ import ast
 
 this_file_dir = os.path.dirname(__file__)
 
-config_types = configparser.ConfigParser()
-config_types.read(os.path.join(this_file_dir, 'types.ini'))
+CONFIG_TYPES = configparser.ConfigParser()
+CONFIG_TYPES.read(os.path.join(this_file_dir, 'types.ini'))
+DEFAULT_CONFIG = configparser.ConfigParser()
+DEFAULT_CONFIG.read(os.path.join(this_file_dir, 'default.ini'))
 
 
 def parse(config_file=None, config=None):
@@ -41,8 +43,19 @@ def parse(config_file=None, config=None):
     if config_file:
         if not os.path.isfile(config_file):
             raise FileNotFoundError(f'config_file {config_file} not found')
+
         config = configparser.ConfigParser()
         config.read(config_file)
+
+    config_sections = config.sections()
+    if len(set(config_sections) - {'general'}) > 1:
+        raise ValueError('config has more than one section with options for visual search stimuli, '
+                         'unclear which to use for generating the stimuli.')
+
+    for section in config.sections():
+        for option in DEFAULT_CONFIG.options(section):
+            if not config.has_option(section, option):
+                config[section][option] = DEFAULT_CONFIG[section][option]
 
     if config.has_option(section='general',
                          option='output_dir'):
@@ -74,7 +87,7 @@ def parse(config_file=None, config=None):
         SubTup = namedtuple(section, section_keys)
         subtup_dict = {}
         for key, val in zip(section_keys, section_values):
-            val_type = config_types[section][key]
+            val_type = CONFIG_TYPES[section][key]
             if val_type == 'int':
                 typed_val = int(val)
             elif val_type == 'float':
