@@ -54,6 +54,20 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(self.tuple_section_fields_equal_ConfigParser_options(basic_config_tup,
                                                                              basic_config))
 
+    def test_parse_rectangle_config(self):
+        # get file we need and load into ConfigParser instance to use for tests
+        basic_config_file = os.path.join(self.test_configs, 'rectangle_config.ini')
+        basic_config = ConfigParser()
+        basic_config.read(basic_config_file)
+
+        # now run through parser
+        basic_config_tup = searchstims.config.parse(basic_config_file)
+
+        self.assertTrue(self.tuple_fields_equal_ConfigParser_sections(basic_config_tup,
+                                                                      basic_config))
+        self.assertTrue(self.tuple_section_fields_equal_ConfigParser_options(basic_config_tup,
+                                                                             basic_config))
+
 
 if __name__ == '__main__':
     unittest.main()
