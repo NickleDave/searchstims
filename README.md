@@ -24,16 +24,16 @@ If you want to download and install locally into an environment with Anaconda:
 The `searchstims` package installs itself so that you can run it from the
 command line. You will use a config.ini file to specify what you want the
 package to generate. Below is how you would configure, 
-taken from the example [config.ini](doc/config.ini) file.
+taken from the example [config.ini](doc/configs/basic_config.ini) file.
 
 ```Ini
-[config]
-num_target_present = 3200
-num_target_absent = 3200
+[general]
+num_target_present = 25
+num_target_absent = 25
 set_sizes = [1, 2, 4, 6, 8]
 output_dir = ~/output
 json_filename = filenames_by_set_size_and_target.json
-stimulus = number
+stimulus = rectangle
 ```
 
 * `num_target_present`, `num_target_absent` : total number of samples (AKA stimuli) to generate where the target is present / absent
