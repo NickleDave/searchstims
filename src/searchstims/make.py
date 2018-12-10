@@ -28,11 +28,27 @@ def make(config_tuple):
     # by using appropriate keys
     # e.g. fnames_set_size_8_target_present = filenames_dict[8]['present']
     filenames_dict = {}
-    general_config = config_tuple.general
-    if general_config.stimulus == 'rectangle':
-        stim_maker = stim_makers.RectangleStimMaker()
-    elif general_config.stimulus == 'number':
-        stim_maker = stim_makers.NumberStimMaker()
+
+    if hasattr(config_tuple, 'rectangle'):
+        init_config = config_tuple.rectangle
+        stim_maker = stim_makers.RectangleStimMaker(target_color=init_config.target_color,
+                                                    distractor_color=init_config.distractor_color,
+                                                    window_size=init_config.image_size,
+                                                    grid_size=init_config.grid_size,
+                                                    rects_width_height=init_config.rects_width_height,
+                                                    jitter=init_config.jitter
+                                                    )
+    elif hasattr(config_tuple, 'number'):
+        init_config = config_tuple.number
+        stim_maker = stim_makers.NumberStimMaker(target_color=init_config.target_color,
+                                                 distractor_color=init_config.distractor_color,
+                                                 window_size=init_config.image_size,
+                                                 grid_size=init_config.grid_size,
+                                                 rects_width_height=init_config.rects_width_height,
+                                                 jitter=init_config.jitter,
+                                                 target_number=init_config.target_number,
+                                                 distractor_number=init_config.distractor_number
+                                                 )
 
     for set_size in general_config.set_sizes:
         # add dict for this set size that will have list of "target present / absent" filenames
@@ -60,14 +76,14 @@ def make(config_tuple):
                 os.makedirs(os.path.join(general_config.output_dir, str(set_size), target))
 
             for i in inds_of_stim_to_make:
+                surface = stim_maker.make_stim(set_size=set_size,
+                                               num_target=num_target)
                 if general_config.stimulus == 'rectangle':
                     filename = ('redvert_v_greenvert_set_size_{}_'
                                 'target_{}_{}.png'.format(set_size, target, i))
                 elif general_config.stimulus == 'number':
                     filename = ('two_v_five_set_size_{}_'
                                 'target_{}_{}.png'.format(set_size, target, i))
-                surface = stim_maker.make_stim(set_size=set_size,
-                                               num_target=num_target)
                 filename = os.path.join(general_config.output_dir,
                                         str(set_size),
                                         target,
