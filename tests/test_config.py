@@ -2,7 +2,6 @@
 test config module
 """
 import os
-import shutil
 from configparser import ConfigParser
 import unittest
 
@@ -14,7 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 class TestConfig(unittest.TestCase):
     def setUp(self):
-        self.test_configs = os.path.join(HERE, 'test_data', 'configs')
+        self.test_configs = os.path.join(HERE, '..', 'doc', 'configs')
 
     def tuple_fields_equal_ConfigParser_sections(self, config_tuple, config_parser_obj):
         if list(config_tuple._fields) == config_parser_obj.sections():
