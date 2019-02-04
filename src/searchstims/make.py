@@ -77,8 +77,8 @@ def make(config_tuple):
                 os.makedirs(os.path.join(general_config.output_dir, str(set_size), target))
 
             for i in inds_of_stim_to_make:
-                surface = stim_maker.make_stim(set_size=set_size,
-                                               num_target=num_target)
+                rect_tuple = stim_maker.make_stim(set_size=set_size,
+                                                  num_target=num_target)
                 if hasattr(config_tuple, 'rectangle'):
                     filename = ('redvert_v_greenvert_set_size_{}_'
                                 'target_{}_{}.png'.format(set_size, target, i))
@@ -89,9 +89,16 @@ def make(config_tuple):
                                         str(set_size),
                                         target,
                                         filename)
-                pygame.image.save(surface, filename)
-                filenames_dict[set_size][target].append(filename)
+                pygame.image.save(rect_tuple.display_surface, filename)
+                file_dict = {
+                    'filename': filename,
+                    'grid_as_char': rect_tuple.grid_as_char,
+                    'target_indices': rect_tuple.target_indices,
+                    'distractor_indices': rect_tuple.distractor_indices,
+                }
+                filenames_dict[set_size][target].append(file_dict)
 
     filenames_json = json.dumps(filenames_dict, indent=4)
-    with open(general_config.json_filename, 'w') as json_output:
+    json_filename = os.path.expanduser(general_config.json_filename)
+    with open(json_filename, 'w') as json_output:
         print(filenames_json, file=json_output)
