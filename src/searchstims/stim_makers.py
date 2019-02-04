@@ -1,4 +1,5 @@
 import os
+from collections import namedtuple
 
 import pygame
 from pygame.locals import *
@@ -19,6 +20,12 @@ colors_dict = {
 class AbstractStimMaker:
     """parent class for all StimMaker classes
     """
+
+    RectTuple = namedtuple('RectTuple', ['display_surface',
+                                         'grid_as_char',
+                                         'target_indices',
+                                         'distractor_indices'])
+
     def __init__(self,
                  target_color='red',
                  distractor_color='green',
