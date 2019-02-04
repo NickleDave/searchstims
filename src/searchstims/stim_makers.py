@@ -129,6 +129,7 @@ class AbstractStimMaker:
         cells_to_use = sorted(np.random.choice(np.arange(num_cells),
                                                size=set_size,
                                                replace=False))
+
         xx_to_use = xx[cells_to_use]
         yy_to_use = yy[cells_to_use]
 
@@ -167,20 +168,32 @@ class AbstractStimMaker:
         target_inds = np.random.choice(np.arange(set_size),
                                        size=num_target).tolist()
         rects = []
+        target_indices = []
+        distractor_indices = []
+        grid_as_char = [''] * num_cells
         for item in range(set_size):
             rect_tuple = (0, 0) + self.rects_width_height
             rect_to_draw = Rect(rect_tuple)
-            rect_to_draw.center = (xx_to_use_ctr[item], yy_to_use_ctr[item])
+            center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
+            rect_to_draw.center = center
             if item in target_inds:
                 is_target = True
+                target_indices.append(center)
+                grid_as_char[cells_to_use[item]] = 't'
             else:
                 is_target = False
+                distractor_indices.append(center)
+                grid_as_char[cells_to_use[item]] = 'd'
             curr_rect = self._return_rect_for_stim(display_surface=display_surface,
                                                    rect_to_draw=rect_to_draw,
                                                    is_target=is_target)
             rects.append(curr_rect)
+        grid_as_char = np.asarray(grid_as_char).reshape(self.grid_size[0], self.grid_size[1]).tolist()
         pygame.display.update()
-        return display_surface
+        return self.RectTuple(display_surface=display_surface,
+                              grid_as_char=grid_as_char,
+                              target_indices=target_indices,
+                              distractor_indices=distractor_indices)
 
 
 class RectangleStimMaker(AbstractStimMaker):
