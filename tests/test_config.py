@@ -4,13 +4,11 @@ test config module
 import os
 from configparser import ConfigParser
 import unittest
-import logging
 
 import searchstims.config
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-log = logging.getLogger(__name__)
 
 
 class TestConfig(unittest.TestCase):
@@ -19,8 +17,6 @@ class TestConfig(unittest.TestCase):
         self.default_config_file = os.path.join(HERE, '..', 'src', 'searchstims', 'default.ini')
         self.default_config = ConfigParser()
         self.default_config.read(self.default_config_file)
-        logging_level = logging.DEBUG
-        logging.basicConfig(level=logging_level)
 
     def tuple_fields_equal_ConfigParser_sections(self, config_tuple, config_parser_obj):
         if list(config_tuple._fields) == config_parser_obj.sections():
@@ -85,12 +81,8 @@ class TestConfig(unittest.TestCase):
     def test_parse_rectangle_config(self):
         # get file we need and load into ConfigParser instance to use for tests
         rectangle_config_file = os.path.join(self.test_configs, 'rectangle_config.ini')
-        config_path = f'rectangle config file path:\n{rectangle_config_file}'
-        log.debug(config_path)
         rectangle_config = ConfigParser()
         rectangle_config.read(rectangle_config_file)
-        sections = f'\nrectangle_config.sections():\n{rectangle_config.sections()}'
-        log.debug(sections)
 
         # now run through parser
         rectangle_config_tup = searchstims.config.parse(rectangle_config_file)
