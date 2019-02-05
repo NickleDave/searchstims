@@ -31,7 +31,8 @@ class TestMain(unittest.TestCase):
         config['general']['set_sizes'] = '[1, 2, 4, 6, 8]'
         config['general']['output_dir'] = self.tmp_output_dir
         config['general']['json_filename'] = 'filenames_by_set_size_and_target.json'
-        config['general']['stimulus'] = 'number'
+        config.add_section('number')
+        config['number']['rects_width_height'] = '(30,30)'
         config_tup = parse(config=config)
         make(config_tup)
 
@@ -43,7 +44,8 @@ class TestMain(unittest.TestCase):
         config['general']['set_sizes'] = '[1, 2, 4, 6, 8]'
         config['general']['output_dir'] = self.tmp_output_dir
         config['general']['json_filename'] = 'filenames_by_set_size_and_target.json'
-        config['general']['stimulus'] = 'rectangle'
+        config.add_section('rectangle')
+        config['rectangle']['rects_width_height'] = '(10,30)'
         config_tup = parse(config=config)
         make(config_tup)
 
