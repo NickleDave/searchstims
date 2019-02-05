@@ -66,13 +66,13 @@ def make(config_tuple):
     """
     if not os.path.isdir(config_tuple.general.output_dir):
         os.makedirs(config_tuple.general.output_dir)
-    # put filenames in a dict that we save as json
-    # so we don't have to do a bunch of string matching to find them later,
-    # instead we can just get all the filenames for a given set size
-    # with target present or absent
+    # put filenames and other info in a dict that we serialize as json
+    # so we don't have to do a bunch of string matching to find filenames later,
+    # instead we just load back into Python as a dict 
+    # and can just get all the filenames for a given set size with target present or absent
     # by using appropriate keys
-    # e.g. fnames_set_size_8_target_present = filenames_dict[8]['present']
-    filenames_dict = {}
+    # e.g. fnames_set_size_8_target_present = [stim_info['filename'] for stim_info in out_dict[8]['present']]
+    out_dict = {}
 
     if hasattr(config_tuple, 'rectangle'):
         init_config = config_tuple.rectangle
@@ -98,7 +98,7 @@ def make(config_tuple):
     general_config = config_tuple.general
     for set_size in general_config.set_sizes:
         # add dict for this set size that will have list of "target present / absent" filenames
-        filenames_dict[set_size] = {}
+        out_dict[set_size] = {}
 
         if not os.path.isdir(
             os.path.join(general_config.output_dir, str(set_size))
@@ -108,7 +108,7 @@ def make(config_tuple):
             )
         for target in ('present', 'absent'):
             # add the actual filename list for 'present' or 'absent'
-            filenames_dict[set_size][target] = []
+            out_dict[set_size][target] = []
             if target == 'present':
                 inds_of_stim_to_make = range(general_config.num_target_present // len(general_config.set_sizes))
                 num_target = 1
@@ -135,15 +135,15 @@ def make(config_tuple):
                                         target,
                                         filename)
                 pygame.image.save(rect_tuple.display_surface, filename)
-                file_dict = {
+                stim_info = {
                     'filename': filename,
                     'grid_as_char': rect_tuple.grid_as_char,
                     'target_indices': rect_tuple.target_indices,
                     'distractor_indices': rect_tuple.distractor_indices,
                 }
-                filenames_dict[set_size][target].append(file_dict)
+                out_dict[set_size][target].append(stim_info)
 
-    filenames_json = json.dumps(filenames_dict, indent=4)
+    out_json = json.dumps(out_dict, indent=4)
     json_filename = os.path.expanduser(general_config.json_filename)
-    with open(json_filename, 'w') as json_output:
-        print(filenames_json, file=json_output)
+    with open(json_filename, 'w') as json_fp:
+        print(out_json, file=json_fp)
