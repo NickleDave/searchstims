@@ -1,3 +1,0 @@
-include ./doc/*.ini
-include ./src/searchstims/*.ini
-include ./src/searchstims/*.png
