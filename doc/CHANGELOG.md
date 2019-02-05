@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+### Added
+- `.json` file saved by searchstims has more info about stimuli, such as location
+  of targets and distractors (in case this is needed for analysis)
+
 ## [0.1.1a1] - 2018-12-02
 ### Added
 - More detail about `config.ini` to README.md, explains what the options actually are for
