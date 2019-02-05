@@ -48,10 +48,10 @@ then be loaded as a Python dictionary with the keys `present` and `absent`.
 
 Running the example script will create a folder `~/output` with feature
 search stimuli.  
-`/home/you/Documents $ searchstims -c config.ini`
+`/home/you/Documents $ searchstims config.ini`
 
 ## `.json` output file
-In addition to saving visaul search stimuli in the output folder, `searchstims` 
+In addition to saving visual search stimuli in the output folder, `searchstims` 
 saves information about stimuli in a `.json` output file. 
 
 This `.json` file is provided to make it easier to work with the visual search 
