@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.json` file saved by searchstims has more info about stimuli, such as location
   of targets and distractors (in case this is needed for analysis)
 
+### Changed
+- command-line interface now requires name of config file as first arg, instead of 
+  specifying it with optional `-c` flag (vestige of when I didn't understand how 
+  `argparse` is meant to work)
+
 ## [0.1.1a1] - 2018-12-02
 ### Added
 - More detail about `config.ini` to README.md, explains what the options actually are for
