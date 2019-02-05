@@ -120,10 +120,10 @@ setup(
     },
     install_requires=REQUIRED,
     extras_require=EXTRAS,
-    include_package_data=True,
     package_data={
         '': ['*.ini', '*.png'],
     },
+    include_package_data=True,
     license=LICENSE,
     classifiers=[
         # Trove classifiers
