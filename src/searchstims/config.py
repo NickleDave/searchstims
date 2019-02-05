@@ -3,7 +3,6 @@ import configparser
 from collections import namedtuple
 from distutils.util import strtobool
 import ast
-import logging
 
 this_file_dir = os.path.dirname(__file__)
 
@@ -11,8 +10,6 @@ CONFIG_TYPES = configparser.ConfigParser()
 CONFIG_TYPES.read(os.path.join(this_file_dir, 'types.ini'))
 DEFAULT_CONFIG = configparser.ConfigParser()
 DEFAULT_CONFIG.read(os.path.join(this_file_dir, 'default.ini'))
-
-log = logging.getLogger(__name__)
 
 
 def parse(config_file=None, config=None):
@@ -56,27 +53,6 @@ def parse(config_file=None, config=None):
                          'unclear which to use for generating the stimuli.')
 
     for section in config.sections():
-        this_file_msg = f'this_file_dir: {this_file_dir}'
-        log.debug(msg=this_file_msg)
-
-        this_file_ls = f'files in this_file_dir: {(os.listdir(this_file_dir))}'
-        log.debug(msg=this_file_ls)
-
-        default_path = os.path.join(this_file_dir, 'default.ini')
-        default_path_msg = f'default config path: {default_path}'
-        log.debug(msg=default_path_msg)
-
-        is_a_file_default = f'is default.ini a file: {str(os.path.isfile(default_path))}'
-        log.debug(msg=is_a_file_default)
-
-        with open(default_path, 'rt') as fp:
-            lines = fp.readlines()
-        lines = f'default.ini file readlines:\n{lines}'
-        log.debug(msg=lines)
-
-        default_sections = f'default config sections: {DEFAULT_CONFIG.sections()}'
-        log.debug(msg=default_sections)
-
         for option in DEFAULT_CONFIG.options(section):
             if not config.has_option(section, option):
                 config[section][option] = DEFAULT_CONFIG[section][option]
