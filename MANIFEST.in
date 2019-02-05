@@ -1,0 +1,2 @@
+include ./doc/*.ini
+include ./src/searchstims/*.ini
