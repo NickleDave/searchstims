@@ -121,7 +121,7 @@ setup(
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     package_data={
-        '': ['*.ini', '*.png'],
+        '': ['*.ini', 'png/*.png'],
     },
     include_package_data=True,
     license=LICENSE,
