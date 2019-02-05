@@ -56,6 +56,8 @@ def parse(config_file=None, config=None):
                          'unclear which to use for generating the stimuli.')
 
     for section in config.sections():
+        this_file_msg = f'this_file_dir: {this_file_dir}'
+        log.debug(msg=this_file_msg)
         default_path = os.path.join(this_file_dir, 'default.ini')
         default_path = f'default config path: {default_path}'
         log.debug(msg=default_path)
