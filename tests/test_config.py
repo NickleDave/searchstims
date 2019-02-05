@@ -81,8 +81,10 @@ class TestConfig(unittest.TestCase):
     def test_parse_rectangle_config(self):
         # get file we need and load into ConfigParser instance to use for tests
         rectangle_config_file = os.path.join(self.test_configs, 'rectangle_config.ini')
+        print('rectangle config file path:', rectangle_config_file)
         rectangle_config = ConfigParser()
         rectangle_config.read(rectangle_config_file)
+        print('rectangle_config:\n',rectangle_config)
 
         # now run through parser
         rectangle_config_tup = searchstims.config.parse(rectangle_config_file)
