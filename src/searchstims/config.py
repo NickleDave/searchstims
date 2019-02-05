@@ -3,6 +3,7 @@ import configparser
 from collections import namedtuple
 from distutils.util import strtobool
 import ast
+import logging
 
 this_file_dir = os.path.dirname(__file__)
 
@@ -10,6 +11,8 @@ CONFIG_TYPES = configparser.ConfigParser()
 CONFIG_TYPES.read(os.path.join(this_file_dir, 'types.ini'))
 DEFAULT_CONFIG = configparser.ConfigParser()
 DEFAULT_CONFIG.read(os.path.join(this_file_dir, 'default.ini'))
+
+log = logging.getLogger(__name__)
 
 
 def parse(config_file=None, config=None):
@@ -53,6 +56,11 @@ def parse(config_file=None, config=None):
                          'unclear which to use for generating the stimuli.')
 
     for section in config.sections():
+        default_path = os.path.join(this_file_dir, 'default.ini')
+        default_path = f'default config path: {default_path}'
+        log.debug(msg=default_path)
+        default_sections = f'default config sections: {DEFAULT_CONFIG.sections()}'
+        log.debug(msg=default_sections)
         for option in DEFAULT_CONFIG.options(section):
             if not config.has_option(section, option):
                 config[section][option] = DEFAULT_CONFIG[section][option]
