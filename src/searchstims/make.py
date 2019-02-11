@@ -81,6 +81,7 @@ def make(config_tuple):
                                                     window_size=init_config.image_size,
                                                     border_size=init_config.border_size,
                                                     grid_size=init_config.grid_size,
+                                                    min_center_dist=init_config.min_center_dist,
                                                     rects_width_height=init_config.rects_width_height,
                                                     jitter=init_config.jitter
                                                     )
@@ -91,6 +92,7 @@ def make(config_tuple):
                                                  window_size=init_config.image_size,
                                                  border_size=init_config.border_size,
                                                  grid_size=init_config.grid_size,
+                                                 min_center_dist=init_config.min_center_dist,
                                                  rects_width_height=init_config.rects_width_height,
                                                  jitter=init_config.jitter,
                                                  target_number=init_config.target_number,
