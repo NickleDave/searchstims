@@ -87,17 +87,21 @@ def parse(config_file=None, config=None):
         SubTup = namedtuple(section, section_keys)
         subtup_dict = {}
         for key, val in zip(section_keys, section_values):
-            val_type = CONFIG_TYPES[section][key]
-            if val_type == 'int':
-                typed_val = int(val)
-            elif val_type == 'float':
-                typed_val = float(val)
-            elif val_type == 'bool':
-                typed_val = bool(strtobool(val))
-            elif val_type == 'list' or val_type == 'tuple':
-                typed_val = ast.literal_eval(val)
-            elif val_type == 'str':
-                typed_val = val
+            if val == 'None':
+                typed_val = None
+            else:
+                val_type = CONFIG_TYPES[section][key]
+                if val_type == 'int':
+                    typed_val = int(val)
+                elif val_type == 'float':
+                    typed_val = float(val)
+                elif val_type == 'bool':
+                    typed_val = bool(strtobool(val))
+                elif val_type == 'list' or val_type == 'tuple':
+                    typed_val = ast.literal_eval(val)
+                elif val_type == 'str':
+                    typed_val = val
+
             subtup_dict[key] = typed_val
         config_dict[section] = SubTup(**subtup_dict)
     config_tuple = ConfigTuple(**config_dict)
