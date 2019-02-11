@@ -30,6 +30,7 @@ class AbstractStimMaker:
                  target_color='red',
                  distractor_color='green',
                  window_size=(227, 227),
+                 border_size=None,
                  grid_size=(5, 5),
                  rects_width_height=(10, 30),
                  jitter=5):
@@ -43,6 +44,10 @@ class AbstractStimMaker:
             {'red', 'green', 'white', 'blue'}. Default is 'green'.
         window_size : tuple
             of length two, representing (width, height) of window in pixels.
+        border_size : tuple
+            of length two, representing (width, height) of border, distance
+            from edge of window within which items should not be displayed.
+            Default is None.
         grid_size : tuple
             of length two, representing the number of (rows, columns)
             in the grid on which tareget and distractors will be located.
@@ -67,6 +72,7 @@ class AbstractStimMaker:
         self.distractor_color = distractor_color
         self.grid_size = grid_size
         self.window_size = window_size
+        self.border_size = border_size
         self.rects_width_height = rects_width_height
         self.jitter = jitter
 
@@ -133,13 +139,23 @@ class AbstractStimMaker:
         xx_to_use = xx[cells_to_use]
         yy_to_use = yy[cells_to_use]
 
+        if self.border_size is None:
+            grid_size_pixels = self.window_size
+        else:
+            grid_size_pixels = (self.window_size[0] - self.border_size[0],
+                                self.window_size[1] - self.border_size[1])
+
         # find centers of cells we're going to use
-        cell_width = round(self.window_size[0] / self.grid_size[0])
-        cell_x_center = round((self.window_size[0] / self.grid_size[0]) / 2)
+        cell_width = round(grid_size_pixels[0] / self.grid_size[0])
+        cell_x_center = round((grid_size_pixels[0] / self.grid_size[0]) / 2)
         xx_to_use_ctr = (xx_to_use * cell_width) - cell_x_center
-        cell_height = round(self.window_size[1] / self.grid_size[1])
-        cell_y_center = round((self.window_size[1] / self.grid_size[1]) / 2)
+        cell_height = round(grid_size_pixels[1] / self.grid_size[1])
+        cell_y_center = round((grid_size_pixels[1] / self.grid_size[1]) / 2)
         yy_to_use_ctr = (yy_to_use * cell_height) - cell_y_center
+
+        if self.border_size:
+            xx_to_use_ctr += round(self.border_size[0] / 2)
+            yy_to_use_ctr += round(self.border_size[1] / 2)
 
         # add jitter to those points
         jitter_high = self.jitter // 2
@@ -228,6 +244,7 @@ class NumberStimMaker(AbstractStimMaker):
                  distractor_color='white',
                  grid_size=(5, 5),
                  window_size=(227, 227),
+                 border_size=None,
                  rects_width_height=(30, 30),
                  jitter=5,
                  target_number=2,
@@ -245,6 +262,7 @@ class NumberStimMaker(AbstractStimMaker):
         super().__init__(target_color=target_color,
                          distractor_color=distractor_color,
                          window_size=window_size,
+                         border_size=border_size,
                          grid_size=grid_size,
                          rects_width_height=rects_width_height,
                          jitter=jitter)
