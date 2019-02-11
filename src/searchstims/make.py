@@ -79,6 +79,7 @@ def make(config_tuple):
         stim_maker = stim_makers.RectangleStimMaker(target_color=init_config.target_color,
                                                     distractor_color=init_config.distractor_color,
                                                     window_size=init_config.image_size,
+                                                    border_size=init_config.border_size,
                                                     grid_size=init_config.grid_size,
                                                     rects_width_height=init_config.rects_width_height,
                                                     jitter=init_config.jitter
@@ -88,6 +89,7 @@ def make(config_tuple):
         stim_maker = stim_makers.NumberStimMaker(target_color=init_config.target_color,
                                                  distractor_color=init_config.distractor_color,
                                                  window_size=init_config.image_size,
+                                                 border_size=init_config.border_size,
                                                  grid_size=init_config.grid_size,
                                                  rects_width_height=init_config.rects_width_height,
                                                  jitter=init_config.jitter,
