@@ -30,6 +30,7 @@ LICENSE = 'BSD'
 REQUIRED = [
     'pygame',
     'numpy',
+    'scipy',
 ]
 
 
