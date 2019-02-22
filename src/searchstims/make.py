@@ -134,13 +134,18 @@ def make(config_tuple):
                 elif hasattr(config_tuple, 'number'):
                     filename = ('two_v_five_set_size_{}_'
                                 'target_{}_{}.png'.format(set_size, target, i))
-                filename = os.path.join(general_config.output_dir,
-                                        str(set_size),
-                                        target,
-                                        filename)
-                pygame.image.save(rect_tuple.display_surface, filename)
+                # use absolute path to save
+                absolute_path_filename = os.path.join(general_config.output_dir,
+                                                      str(set_size),
+                                                      target,
+                                                      filename)
+                pygame.image.save(rect_tuple.display_surface, absolute_path_filename)
+                # use relative path for name of file in .json
+                # so it won't break anything if we move the whole directory of images around;
+                # --> it's the job of code the images to know where directory is at
+                relative_path_filename = os.path.join(str(set_size), target, filename)
                 stim_info = {
-                    'filename': filename,
+                    'filename': relative_path_filename,
                     'grid_as_char': rect_tuple.grid_as_char,
                     'target_indices': rect_tuple.target_indices,
                     'distractor_indices': rect_tuple.distractor_indices,
