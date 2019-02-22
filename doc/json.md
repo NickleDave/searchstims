@@ -56,7 +56,10 @@ Each 'present' and 'absent' key has as its value a list of Python dictionaries;
 each dictionary in the list has info about the actual visual search stimulus image
 that it corresponds to:
     filename: str
-        actual visual search stimulus filename
+        filename of a single visual search stimulus image. Specified relative to the root 
+        of `output_dir` that was named in config.ini file used to generate the image. This 
+        means you will need to `join` the `output_dir` with `filename` to load the image in your 
+        own scripts.
     grid_as_char: list
         of list of str. Representation of stimulus as a grid of
         cells
