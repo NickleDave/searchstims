@@ -23,7 +23,7 @@ URL = 'https://github.com/NickleDave/main.py'
 EMAIL = 'nicholdav@gmail.com'
 AUTHOR = 'David Nicholson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.2.0a4'
+VERSION = '0.2.0a5'
 LICENSE = 'BSD'
 
 # What packages are required for this module to be executed?
