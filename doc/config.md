@@ -48,9 +48,34 @@ Stimulus-specific options are defined in the sections below that show defaults v
     width of each cell in the grid will be `(image_size[0] / grid_size[0], image_size[1] / grid_size[1])` 
 * `jitter` : int
 * `target_color` : str
-   color of target. Colors currently available are {'black', 'white', 'red', 'green', 'blue'}
+   color of target. Colors are defined as RGB in a Python dictionary. You specify a color by its name listed 
+   below as the key of the dictionary:
+
+       colors_dict = {
+        'black': (0, 0, 0),
+        'white': (255, 255, 255),
+        'red': (255, 0, 0),
+        'green': (0, 255, 0),
+        'blue': (0, 0, 255),
+        'red255green51': (255, 51, 0),
+        'green255red51': (51, 255, 0),
+        'red255green102': (255, 102, 0),
+        'green255red102': (102, 255, 0),
+        'red255green153': (255, 153, 0),
+        'green255red153': (153, 255, 0),
+        'red255green204': (255, 204, 0),
+        'green255red204': (204, 255, 0),
+    }
+
+    Notice the colors defined in terms of how they move from either red or green towards yellow (because of how 
+RGB color space works); this makes it possible to vary the discriminability of the target and distractor along a 
+single feature dimension (color). Using this, one can fit a psychometric curve to the classifications of a neural 
+network and estimate its accuracy level for a known discriminability of targets from distractors. **Please note also
+that these latter colors only work for the `rectangle` stimulus; for the `number` stimulus valid colors are limited
+to: `{'white', 'red', 'green'}`.
+
 * `distractor_color` : str
-   color of distractors.
+   color of distractors. Specified in the same way as `target_color`.
 
 ### `[rectangle]`
 Colored rectangles, a typical stimulus that allows for "efficient" search.
