@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0a6] 2019-02-11
+### Added
+- colors available for 'rectangle' stimulus that move either from red or green towards yellow (because of how 
+RGB color space works); this makes it possible to vary the discriminability of the target and distractor along a 
+single feature dimension (color). Using this one can fit a psychometric curve to the classifications of a neural 
+network and estimate its accuracy level for a known discriminability of targets from distractors. 
+
 ## [0.2.0a5] 2019-02-11
 ### Changed
 - image filenames in .json file are saved as relative to `output_dir` that was specified in `.ini` file
