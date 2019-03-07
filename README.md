@@ -36,4 +36,8 @@ In addition to saving visual search stimuli in the output folder, `searchstims`
 saves information about stimuli in a `.json` output file.  This `.json` file is 
 provided to make it easier to work with the visual search image files, 
 and analyze results obtained with them. For more detail, see [./doc/json.md](./doc/json.md)
- 
+
+## Acknowledgments
+- Research funded by the Lifelong Learning Machines program, 
+DARPA/Microsystems Technology Office, 
+DARPA cooperative agreement HR0011-18-2-0019
