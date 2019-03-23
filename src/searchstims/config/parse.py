@@ -48,9 +48,6 @@ def parse(config_file=None, config=None):
         config.read(config_file)
 
     config_sections = config.sections()
-    if len(set(config_sections) - {'general'}) > 1:
-        raise ValueError('config has more than one section with options for visual search stimuli, '
-                         'unclear which to use for generating the stimuli.')
 
     for section in config.sections():
         for option in DEFAULT_CONFIG.options(section):
