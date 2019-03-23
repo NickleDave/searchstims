@@ -31,6 +31,7 @@ REQUIRED = [
     'pygame',
     'numpy',
     'scipy',
+    'attrs',
 ]
 
 
