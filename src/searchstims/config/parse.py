@@ -8,6 +8,8 @@ this_file_dir = os.path.dirname(__file__)
 
 CONFIG_TYPES = configparser.ConfigParser()
 CONFIG_TYPES.read(os.path.join(this_file_dir, 'types.ini'))
+VALID_SECTIONS = CONFIG_TYPES.sections()
+
 DEFAULT_CONFIG = configparser.ConfigParser()
 DEFAULT_CONFIG.read(os.path.join(this_file_dir, 'default.ini'))
 
@@ -47,9 +49,10 @@ def parse(config_file=None, config=None):
         config = configparser.ConfigParser()
         config.read(config_file)
 
-    config_sections = config.sections()
-
     for section in config.sections():
+        if section not in VALID_SECTIONS:
+            raise ValueError(f'invalid section name: {section}.\n'
+                             f'Valid section names are: {VALID_SECTIONS}')
         for option in DEFAULT_CONFIG.options(section):
             if not config.has_option(section, option):
                 config[section][option] = DEFAULT_CONFIG[section][option]
