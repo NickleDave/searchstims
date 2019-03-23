@@ -1,8 +1,9 @@
 import os
 import configparser
-from collections import namedtuple
 from distutils.util import strtobool
 import ast
+
+from .classes import Config
 
 this_file_dir = os.path.dirname(__file__)
 
@@ -79,13 +80,11 @@ def parse(config_file=None, config=None):
 
     # fancy way of turning ConfigParser instance into a namedtuple
     sections = [key for key in list(config.keys()) if key != 'DEFAULT']
-    ConfigTuple = namedtuple('ConfigTuple', sections)
     config_dict = {}
     for section in sections:
         section_keys = list(config[section].keys())
         section_values = list(config[section].values())
-        SubTup = namedtuple(section, section_keys)
-        subtup_dict = {}
+        section_dict = {}
         for key, val in zip(section_keys, section_values):
             if val == 'None':
                 typed_val = None
@@ -101,8 +100,13 @@ def parse(config_file=None, config=None):
                     typed_val = ast.literal_eval(val)
                 elif val_type == 'str':
                     typed_val = val
+            section_dict[key] = typed_val
+        config_dict[section] = section_dict
 
-            subtup_dict[key] = typed_val
-        config_dict[section] = SubTup(**subtup_dict)
-    config_tuple = ConfigTuple(**config_dict)
-    return config_tuple
+    # if user didn't declare some stim section, set to None
+    for section in VALID_SECTIONS:
+        if section not in config_dict:
+            config_dict[section] = None
+
+    config_obj = Config(**config_dict)
+    return config_obj
