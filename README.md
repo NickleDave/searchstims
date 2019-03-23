@@ -7,6 +7,8 @@ https://en.wikipedia.org/wiki/Visual_search
 ![efficient_search](doc/redvert_v_greenvert_set_size_4_target_present_55.png)
 ![inefficient_search](doc/two_v_five_set_size_6_target_present_78.png)
 
+There are links to example configuration files below.
+
 For a recent review of factors influencing visual search, please see:  
 http://search.bwh.harvard.edu/new/pubs/FiveFactors_Wolfe-Horowitz_2017.pdf
 
@@ -30,6 +32,10 @@ you want the package to generate.
 Running the example script will create a folder `~/output` with visual search stimuli. 
 For more detail on the structure of `config.ini` files used with this package, see 
 [./doc/config.md](./doc/config/md).
+
+For examples of config.ini files, see [./doc/configs/](./doc/configs/).
+These examples were used in this project:  
+<https://github.com/NickleDave/visual-search-nets>
 
 ## `.json` output file
 In addition to saving visual search stimuli in the output folder, `searchstims` 
