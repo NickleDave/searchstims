@@ -3,7 +3,14 @@ import configparser
 from distutils.util import strtobool
 import ast
 
-from .classes import Config
+from .classes import Config, GeneralConfig, RectangleConfig, NumberConfig
+
+SECTION_CLASS_MAP = {
+    'general': GeneralConfig,
+    'rectangle': RectangleConfig,
+    'number': NumberConfig,
+}
+
 
 this_file_dir = os.path.dirname(__file__)
 
@@ -33,11 +40,12 @@ def parse(config_file=None, config=None):
 
     Returns
     -------
-    config_tuple : namedtuple
-        where fields are sections of the config, and
-        values for those fields are also namedtuples,
-        with fields being options and values being the
-        values for those options from the config.ini file.
+    config : searchstims.config.classes.Config
+        instance of Config class that represents sections of config.ini file,
+        with attributes general, number, and rectangle, each of which is an
+        instance of a class that represents those sections with attributes being
+        the options in those sections and the corresponding values set by the
+        user.
     """
     if config_file and config:
         raise TypeError('cannot call parse function with config_file and config, '
@@ -50,10 +58,13 @@ def parse(config_file=None, config=None):
         config = configparser.ConfigParser()
         config.read(config_file)
 
+    # validate sections and set default values from default.ini
     for section in config.sections():
+        # is section name valid?
         if section not in VALID_SECTIONS:
             raise ValueError(f'invalid section name: {section}.\n'
                              f'Valid section names are: {VALID_SECTIONS}')
+        # if so, check for undeclared options and if not declared, set to defaults from default.ini
         for option in DEFAULT_CONFIG.options(section):
             if not config.has_option(section, option):
                 config[section][option] = DEFAULT_CONFIG[section][option]
@@ -78,9 +89,8 @@ def parse(config_file=None, config=None):
                                                           'filenames_by_set_size_'
                                                           'and_target.json')
 
-    # fancy way of turning ConfigParser instance into a namedtuple
     sections = [key for key in list(config.keys()) if key != 'DEFAULT']
-    config_dict = {}
+    typed_config_dict = {}
     for section in sections:
         section_keys = list(config[section].keys())
         section_values = list(config[section].values())
@@ -101,12 +111,19 @@ def parse(config_file=None, config=None):
                 elif val_type == 'str':
                     typed_val = val
             section_dict[key] = typed_val
-        config_dict[section] = section_dict
+        typed_config_dict[section] = section_dict
 
     # if user didn't declare some stim section, set to None
     for section in VALID_SECTIONS:
         if section not in config_dict:
             config_dict[section] = None
 
-    config_obj = Config(**config_dict)
+    config_classes_dict = {}
+    for section in config_dict.keys():
+        if section is not None:
+            section_class = SECTION_CLASS_MAP[section]
+            config_classes_dict[section] = section_class(**typed_config_dict)
+
+    config_obj = Config(**config_classes_dict)
+
     return config_obj
