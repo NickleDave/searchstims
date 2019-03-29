@@ -22,7 +22,7 @@ DEFAULT_CONFIG = configparser.ConfigParser()
 DEFAULT_CONFIG.read(os.path.join(this_file_dir, 'default.ini'))
 
 
-def parse(config_file=None, config=None):
+def parse(config_file=None):
     """read config.ini file with config parser,
     returns namedtuple ConfigTuple with
     sections and options as attributes.
@@ -30,13 +30,8 @@ def parse(config_file=None, config=None):
     Parameters
     ----------
     config_file : str
-        Path to a config.ini file. If None, the
-        default configuration is returned.
+        Path to a config.ini file. If None, the default configuration is returned.
         Default is None.
-    config: configparser.ConfigParser
-        instance of ConfigParser that already has sections and options declared.
-        This parameter is mainly used in testing, to write tests where the options
-        are explicit in that file.
 
     Returns
     -------
@@ -47,13 +42,11 @@ def parse(config_file=None, config=None):
         the options in those sections and the corresponding values set by the
         user.
     """
-    if config_file and config:
-        raise TypeError('cannot call parse function with config_file and config, '
-                        'unclear which to use.')
+    if not os.path.isfile(config_file):
+        raise FileNotFoundError(f'config_file {config_file} not found')
 
-    if config_file:
-        if not os.path.isfile(config_file):
-            raise FileNotFoundError(f'config_file {config_file} not found')
+    config = configparser.ConfigParser()
+    config.read(config_file)
 
         config = configparser.ConfigParser()
         config.read(config_file)
