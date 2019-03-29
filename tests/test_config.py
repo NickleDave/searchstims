@@ -2,6 +2,7 @@
 import os
 from configparser import ConfigParser
 import unittest
+import tempfile
 
 import searchstims.config
 
@@ -17,6 +18,17 @@ class TestConfig(unittest.TestCase):
         self.test_configs = os.path.join(HERE, 'test_data', 'configs')
         self.default_config = ConfigParser()
         self.default_config.read(DEFAULT_CONFIG_FILE)
+
+    def test_no_general_section_raises_error(self):
+        tmp_dir = tempfile.mkdtemp()
+        default_config_copy = ConfigParser()
+        default_config_copy.read_dict(self.default_config)
+        default_config_copy.remove_section('general')
+        no_general_config_file = os.path.join(tmp_dir, 'no_general_config.ini')
+        with open(no_general_config_file, 'w') as f:
+            default_config_copy.write(f)
+        with self.assertRaises(ValueError):
+            searchstims.config.parse(config_file=no_general_config_file)
 
     def test_parse_rectangle_config(self):
         # get file we need and load into ConfigParser instance to use for tests
