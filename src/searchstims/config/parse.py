@@ -110,14 +110,14 @@ def parse(config_file=None):
 
     # if user didn't declare some stim section, set to None
     for section in VALID_SECTIONS:
-        if section not in config_dict:
-            config_dict[section] = None
+        if section not in typed_config_dict:
+            typed_config_dict[section] = None
 
     config_classes_dict = {}
-    for section in config_dict.keys():
-        if section is not None:
+    for section in typed_config_dict.keys():
+        if typed_config_dict[section] is not None:
             section_class = SECTION_CLASS_MAP[section]
-            config_classes_dict[section] = section_class(**typed_config_dict)
+            config_classes_dict[section] = section_class(**typed_config_dict[section])
 
     config_obj = Config(**config_classes_dict)
 
