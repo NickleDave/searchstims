@@ -48,8 +48,10 @@ def parse(config_file=None):
     config = configparser.ConfigParser()
     config.read(config_file)
 
-        config = configparser.ConfigParser()
-        config.read(config_file)
+    if not config.has_section('general'):
+        raise ValueError(
+            f"'general' section required in configuration file but not found in {config_file}"
+        )
 
     # validate sections and set default values from default.ini
     for section in config.sections():
