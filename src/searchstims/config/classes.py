@@ -33,7 +33,6 @@ class GeneralConfig:
     """
     output_dir = attr.ib(validator=instance_of(str))
     json_filename = attr.ib(validator=instance_of(str))
-    set_size = attr.ib(validator=optional(instance_of(list)))
     num_target_present = attr.ib(converter=converters.optional(int))
     num_target_absent = attr.ib(converter=converters.optional(int))
     set_sizes = attr.ib(validator=optional(instance_of(list)))
