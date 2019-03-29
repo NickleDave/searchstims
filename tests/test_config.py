@@ -52,6 +52,17 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(hasattr(number_config_obj, 'number'))
         self.assertTrue(number_config_obj.rectangle is None)
 
+    def test_parse_rectangle_number_config(self):
+        # get file we need and load into ConfigParser instance to use for tests
+        config_file = os.path.join(self.test_configs, 'config_feature_spatial_vgg16.ini')
+        config = ConfigParser()
+        config.read(config_file)
+        config_obj = searchstims.config.parse(config_file)
+
+        self.assertTrue(hasattr(config_obj, 'general'))
+        self.assertTrue(hasattr(config_obj, 'rectangle'))
+        self.assertTrue(hasattr(config_obj, 'number'))
+
 
 if __name__ == '__main__':
     unittest.main()
