@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.com/NickleDave/searchstims.svg?branch=master)](https://travis-ci.com/NickleDave/searchstims)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![DOI](https://zenodo.org/badge/134479044.svg)](https://zenodo.org/badge/latestdoi/134479044)
+[![PyPI version](https://badge.fury.io/py/searchstims.svg)](https://badge.fury.io/py/searchstims)
+
 # searchstims
 
 Python package to make stimuli like those used in classic visual search experiments  
@@ -37,11 +42,18 @@ For examples of config.ini files, see [./doc/configs/](./doc/configs/).
 These examples were used in this project:  
 <https://github.com/NickleDave/visual-search-nets>
 
-## `.json` output file
+### `.json` output file
 In addition to saving visual search stimuli in the output folder, `searchstims` 
 saves information about stimuli in a `.json` output file.  This `.json` file is 
 provided to make it easier to work with the visual search image files, 
 and analyze results obtained with them. For more detail, see [./doc/json.md](./doc/json.md)
+
+## License
+[BSD-3](./LICENSE.txt)
+
+## Citation
+If you use this library, please cite this repository using the DOI:  
+[![DOI](https://zenodo.org/badge/134479044.svg)](https://zenodo.org/badge/latestdoi/134479044)
 
 ## Acknowledgments
 - Research funded by the Lifelong Learning Machines program, 
