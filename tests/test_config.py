@@ -59,7 +59,7 @@ class TestConfig(unittest.TestCase):
 
     def test_parse_rectangle_config(self):
         # get file we need and load into ConfigParser instance to use for tests
-        rectangle_config_file = os.path.join(self.test_configs, 'rectangle_config.ini')
+        rectangle_config_file = os.path.join(self.test_configs, 'test_rectangle_config.ini')
         rectangle_config = ConfigParser()
         rectangle_config.read(rectangle_config_file)
         rectangle_config_obj = searchstims.config.parse(rectangle_config_file)
@@ -73,7 +73,7 @@ class TestConfig(unittest.TestCase):
 
     def test_parse_number_config(self):
         # get file we need and load into ConfigParser instance to use for tests
-        number_config_file = os.path.join(self.test_configs, 'number_config.ini')
+        number_config_file = os.path.join(self.test_configs, 'test_number_config.ini')
         number_config = ConfigParser()
         number_config.read(number_config_file)
         number_config_obj = searchstims.config.parse(number_config_file)
@@ -88,7 +88,7 @@ class TestConfig(unittest.TestCase):
 
     def test_parse_rectangle_number_config(self):
         # get file we need and load into ConfigParser instance to use for tests
-        config_file = os.path.join(self.test_configs, 'config_feature_spatial_vgg16.ini')
+        config_file = os.path.join(self.test_configs, 'test_config_feature_spatial_vgg16.ini')
         config = ConfigParser()
         config.read(config_file)
         config_obj = searchstims.config.parse(config_file)
