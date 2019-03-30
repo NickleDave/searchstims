@@ -4,20 +4,26 @@ import pygame
 
 from . import stim_makers
 
+VALID_STIM_SECTIONS = [
+    'rectangle',
+    'number'
+]
 
-def make(config_tuple):
+
+def make(config_obj):
     """actual function that makes all the stimuli
 
     Parameters
     ----------
-    config_tuple : ConfigTuple
-        returned by parse_config after parsing a config.ini file
+    config_obj : searchstims.config.classes.Config
+        instance of Config returned by parse_config
+        after parsing a config.ini file
 
     Returns
     -------
     None
 
-    saves all the stimuli to config_tuple.output_dir, and saves information about
+    saves all the stimuli to config_obj.output_dir, and saves information about
     stimuli in a .json output file. This .json file is a serialized Python
     dictionary of dictionaries with the following key, field pairs:
     {set size: {
@@ -64,8 +70,11 @@ def make(config_tuple):
             'grid_as_char': [['', 'd', '', '', ''],
             ...
     """
-    if not os.path.isdir(config_tuple.general.output_dir):
-        os.makedirs(config_tuple.general.output_dir)
+    general_config = config_obj.general
+    root_output_dir = general_config.output_dir
+    if not os.path.isdir(root_output_dir):
+        os.makedirs(root_output_dir)
+
     # put filenames and other info in a dict that we serialize as json
     # so we don't have to do a bunch of string matching to find filenames later,
     # instead we just load back into Python as a dict 
@@ -74,85 +83,90 @@ def make(config_tuple):
     # e.g. fnames_set_size_8_target_present = [stim_info['filename'] for stim_info in out_dict[8]['present']]
     out_dict = {}
 
-    if hasattr(config_tuple, 'rectangle'):
-        init_config = config_tuple.rectangle
-        stim_maker = stim_makers.RectangleStimMaker(target_color=init_config.target_color,
-                                                    distractor_color=init_config.distractor_color,
-                                                    window_size=init_config.image_size,
-                                                    border_size=init_config.border_size,
-                                                    grid_size=init_config.grid_size,
-                                                    min_center_dist=init_config.min_center_dist,
-                                                    rects_width_height=init_config.rects_width_height,
-                                                    jitter=init_config.jitter
-                                                    )
-    elif hasattr(config_tuple, 'number'):
-        init_config = config_tuple.number
-        stim_maker = stim_makers.NumberStimMaker(target_color=init_config.target_color,
-                                                 distractor_color=init_config.distractor_color,
-                                                 window_size=init_config.image_size,
-                                                 border_size=init_config.border_size,
-                                                 grid_size=init_config.grid_size,
-                                                 min_center_dist=init_config.min_center_dist,
-                                                 rects_width_height=init_config.rects_width_height,
-                                                 jitter=init_config.jitter,
-                                                 target_number=init_config.target_number,
-                                                 distractor_number=init_config.distractor_number
-                                                 )
+    for section in VALID_STIM_SECTIONS:
+        if getattr(config_obj, section) is not None:
+            if section == 'rectangle':
+                init_config = config_obj.rectangle
+                stim_maker = stim_makers.RectangleStimMaker(target_color=init_config.target_color,
+                                                            distractor_color=init_config.distractor_color,
+                                                            window_size=init_config.image_size,
+                                                            border_size=init_config.border_size,
+                                                            grid_size=init_config.grid_size,
+                                                            min_center_dist=init_config.min_center_dist,
+                                                            rects_width_height=init_config.rects_width_height,
+                                                            jitter=init_config.jitter
+                                                            )
+            elif section == 'number':
+                init_config = config_obj.number
+                stim_maker = stim_makers.NumberStimMaker(target_color=init_config.target_color,
+                                                         distractor_color=init_config.distractor_color,
+                                                         window_size=init_config.image_size,
+                                                         border_size=init_config.border_size,
+                                                         grid_size=init_config.grid_size,
+                                                         min_center_dist=init_config.min_center_dist,
+                                                         rects_width_height=init_config.rects_width_height,
+                                                         jitter=init_config.jitter,
+                                                         target_number=init_config.target_number,
+                                                         distractor_number=init_config.distractor_number
+                                                         )
+            this_section_output_dir = os.path.join(root_output_dir, section)
 
-    general_config = config_tuple.general
-    for set_size in general_config.set_sizes:
-        # add dict for this set size that will have list of "target present / absent" filenames
-        out_dict[set_size] = {}
+            for set_size in general_config.set_sizes:
+                # add dict for this set size that will have list of "target present / absent" filenames
+                out_dict[set_size] = {}
 
-        if not os.path.isdir(
-            os.path.join(general_config.output_dir, str(set_size))
-        ):
-            os.makedirs(
-                os.path.join(general_config.output_dir, str(set_size))
-            )
-        for target in ('present', 'absent'):
-            # add the actual filename list for 'present' or 'absent'
-            out_dict[set_size][target] = []
-            if target == 'present':
-                inds_of_stim_to_make = range(general_config.num_target_present // len(general_config.set_sizes))
-                num_target = 1
-            elif target == 'absent':
-                inds_of_stim_to_make = range(general_config.num_target_absent // len(general_config.set_sizes))
-                num_target = 0
+                if not os.path.isdir(
+                    os.path.join(this_section_output_dir, str(set_size))
+                ):
+                    os.makedirs(
+                        os.path.join(this_section_output_dir, str(set_size))
+                    )
+                for target in ('present', 'absent'):
+                    # add the actual filename list for 'present' or 'absent'
+                    out_dict[set_size][target] = []
+                    if target == 'present':
+                        inds_of_stim_to_make = range(general_config.num_target_present // len(general_config.set_sizes))
+                        num_target = 1
+                    elif target == 'absent':
+                        inds_of_stim_to_make = range(general_config.num_target_absent // len(general_config.set_sizes))
+                        num_target = 0
 
-            if not os.path.isdir(
-                    os.path.join(general_config.output_dir, str(set_size), target)
-            ):
-                os.makedirs(os.path.join(general_config.output_dir, str(set_size), target))
+                    if not os.path.isdir(
+                            os.path.join(this_section_output_dir, str(set_size), target)
+                    ):
+                        os.makedirs(os.path.join(this_section_output_dir, str(set_size), target))
 
-            for i in inds_of_stim_to_make:
-                rect_tuple = stim_maker.make_stim(set_size=set_size,
-                                                  num_target=num_target)
-                if hasattr(config_tuple, 'rectangle'):
-                    filename = ('redvert_v_greenvert_set_size_{}_'
-                                'target_{}_{}.png'.format(set_size, target, i))
-                elif hasattr(config_tuple, 'number'):
-                    filename = ('two_v_five_set_size_{}_'
-                                'target_{}_{}.png'.format(set_size, target, i))
-                # use absolute path to save
-                absolute_path_filename = os.path.join(general_config.output_dir,
-                                                      str(set_size),
-                                                      target,
-                                                      filename)
-                pygame.image.save(rect_tuple.display_surface, absolute_path_filename)
-                # use relative path for name of file in .json
-                # so it won't break anything if we move the whole directory of images around;
-                # --> it's the job of code the images to know where directory is at
-                relative_path_filename = os.path.join(str(set_size), target, filename)
-                stim_info = {
-                    'filename': relative_path_filename,
-                    'grid_as_char': rect_tuple.grid_as_char,
-                    'target_indices': rect_tuple.target_indices,
-                    'distractor_indices': rect_tuple.distractor_indices,
-                }
-                out_dict[set_size][target].append(stim_info)
+                    for i in inds_of_stim_to_make:
+                        rect_tuple = stim_maker.make_stim(set_size=set_size,
+                                                          num_target=num_target)
+                        if section == 'rectangle':
+                            filename = ('redvert_v_greenvert_set_size_{}_'
+                                        'target_{}_{}.png'.format(set_size, target, i))
+                        elif section == 'number':
+                            filename = ('two_v_five_set_size_{}_'
+                                        'target_{}_{}.png'.format(set_size, target, i))
+                        # use absolute path to save
+                        absolute_path_filename = os.path.join(this_section_output_dir,
+                                                              str(set_size),
+                                                              target,
+                                                              filename)
+                        pygame.image.save(rect_tuple.display_surface, absolute_path_filename)
+                        # use relative path for name of file in .json
+                        # so it won't break anything if we move the whole directory of images around;
+                        # --> it's the job of code the images to know where directory is at
+                        relative_path_filename = os.path.join(section, str(set_size), target, filename)
+                        stim_info = {
+                            'filename': relative_path_filename,
+                            'grid_as_char': rect_tuple.grid_as_char,
+                            'target_indices': rect_tuple.target_indices,
+                            'distractor_indices': rect_tuple.distractor_indices,
+                        }
+                        out_dict[set_size][target].append(stim_info)
 
     out_json = json.dumps(out_dict, indent=4)
     json_filename = os.path.expanduser(general_config.json_filename)
+    if os.path.split(json_filename)[0] == '':
+        json_filename = os.path.join(root_output_dir, json_filename)
+
     with open(json_filename, 'w') as json_fp:
         print(out_json, file=json_fp)

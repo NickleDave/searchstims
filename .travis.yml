@@ -26,5 +26,10 @@ install:
   - source activate testenv
   - pip install .
 
+env:
+  global:
+    - SDL_VIDEODRIVER=dummy
+    - SDL_AUDIODRIVER=disk
+
 script:
   - python -m unittest
