@@ -4,7 +4,6 @@ test make module
 import os
 import tempfile
 import shutil
-from configparser import ConfigParser
 import unittest
 
 from searchstims.config import parse
