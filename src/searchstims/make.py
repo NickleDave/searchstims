@@ -86,28 +86,28 @@ def make(config_obj):
     for section in VALID_STIM_SECTIONS:
         if getattr(config_obj, section) is not None:
             if section == 'rectangle':
-                init_config = config_obj.rectangle
-                stim_maker = stim_makers.RectangleStimMaker(target_color=init_config.target_color,
-                                                            distractor_color=init_config.distractor_color,
-                                                            window_size=init_config.image_size,
-                                                            border_size=init_config.border_size,
-                                                            grid_size=init_config.grid_size,
-                                                            min_center_dist=init_config.min_center_dist,
-                                                            rects_width_height=init_config.rects_width_height,
-                                                            jitter=init_config.jitter
+                stim_config = config_obj.rectangle
+                stim_maker = stim_makers.RectangleStimMaker(target_color=stim_config.target_color,
+                                                            distractor_color=stim_config.distractor_color,
+                                                            window_size=stim_config.image_size,
+                                                            border_size=stim_config.border_size,
+                                                            grid_size=stim_config.grid_size,
+                                                            min_center_dist=stim_config.min_center_dist,
+                                                            rects_width_height=stim_config.rects_width_height,
+                                                            jitter=stim_config.jitter
                                                             )
             elif section == 'number':
-                init_config = config_obj.number
-                stim_maker = stim_makers.NumberStimMaker(target_color=init_config.target_color,
-                                                         distractor_color=init_config.distractor_color,
-                                                         window_size=init_config.image_size,
-                                                         border_size=init_config.border_size,
-                                                         grid_size=init_config.grid_size,
-                                                         min_center_dist=init_config.min_center_dist,
-                                                         rects_width_height=init_config.rects_width_height,
-                                                         jitter=init_config.jitter,
-                                                         target_number=init_config.target_number,
-                                                         distractor_number=init_config.distractor_number
+                stim_config = config_obj.number
+                stim_maker = stim_makers.NumberStimMaker(target_color=stim_config.target_color,
+                                                         distractor_color=stim_config.distractor_color,
+                                                         window_size=stim_config.image_size,
+                                                         border_size=stim_config.border_size,
+                                                         grid_size=stim_config.grid_size,
+                                                         min_center_dist=stim_config.min_center_dist,
+                                                         rects_width_height=stim_config.rects_width_height,
+                                                         jitter=stim_config.jitter,
+                                                         target_number=stim_config.target_number,
+                                                         distractor_number=stim_config.distractor_number
                                                          )
             this_section_output_dir = os.path.join(root_output_dir, section)
 
