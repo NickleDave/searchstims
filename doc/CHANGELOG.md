@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0a1] 2019-03-29
+### Added
+- possible to make multiple types of stimuli with a single config file
+  + any section that is defined gets made
+
+### Changed
+- clean up configuration handling
+  + add `searchstims.config` sub-package, move config-related code in there
+  + uses `attrs`-based classes instead of `NamedTuple`s
+
+### Fixed
+- continuous integration no longer fails, tests pass
+  + set environment variable for library that PyGame depends on so that library runs with a dummy driver
+  and that way the "no video card" error doesn't get thrown
+
 ## [0.2.0] 2019-03-07
 ### Added
 - Acknowledgments with number for DARPA funding in README.md.
