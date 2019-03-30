@@ -68,21 +68,6 @@ def parse(config_file=None):
                          option='output_dir'):
         output_dir = config['general']['output_dir']
         config['general']['output_dir'] = os.path.expanduser(output_dir)
-    else:
-        config['general']['output_dir'] = os.path.join('.', 'output')
-
-    if config.has_option(section='general',
-                         option='json_filename'):
-        if os.path.split(config['general']['json_filename'])[0] == '':
-            config['general']['json_filename'] = os.path.join(output_dir,
-                                                             config['general']['json_filename'])
-        else:
-            config['general']['json_filename'] = config['general']['json_filename']
-    else:
-        # default filename if option not used
-        config['general']['json_filename'] = os.path.join(output_dir,
-                                                          'filenames_by_set_size_'
-                                                          'and_target.json')
 
     sections = [key for key in list(config.keys()) if key != 'DEFAULT']
     typed_config_dict = {}
