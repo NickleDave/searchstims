@@ -13,7 +13,7 @@ from searchstims.make import make
 HERE = os.path.dirname(__file__)
 
 
-class TestMain(unittest.TestCase):
+class TestMake(unittest.TestCase):
 
     def setUp(self):
         self.test_configs = os.path.join(HERE, 'test_data', 'configs')
