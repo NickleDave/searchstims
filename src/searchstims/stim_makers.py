@@ -45,7 +45,7 @@ class AbstractStimMaker:
                  border_size=None,
                  grid_size=(5, 5),
                  min_center_dist=None,
-                 item_bbox_size=(10, 30),
+                 item_bbox_size=(30, 30),
                  jitter=5):
         """__init__ function for Stim Makers
 
@@ -56,9 +56,9 @@ class AbstractStimMaker:
         distractor_color : str
             {'red', 'green', 'white', 'blue'}. Default is 'green'.
         window_size : tuple
-            of length two, representing (width, height) of window in pixels.
+            of length two, representing (height, width) of window in pixels.
         border_size : tuple
-            of length two, representing (width, height) of border, distance
+            of length two, representing (height, width) of border, distance
             from edge of window within which items should not be displayed.
             Default is None.
         grid_size : tuple
@@ -70,7 +70,7 @@ class AbstractStimMaker:
             and items are placed randomly instead of on a grid.
         item_bbox_size : tuple
             shape of pygame Rect objects that will be plotted,
-            (width, height) in pixels. Default is (10, 30).
+            (height, width) in pixels. Default is (30, 30).
         jitter : int
             number of pixels to jitter each 'item' in the 'set'
             that will be plotted on the grid. Default is 5.
@@ -145,6 +145,10 @@ class AbstractStimMaker:
         if type(self.jitter) != int:
             raise TypeError('value for jitter must be an integer')
 
+        ###########################################################################
+        # notice: below we always refer to y before x, because shapes are         #
+        # specified in order of (height, width). So size[0] = y and size[1] = x   #
+        ###########################################################################
         if self.grid_size:
             if self.border_size is None:
                 grid_size_pixels = self.window_size
@@ -152,32 +156,32 @@ class AbstractStimMaker:
                 grid_size_pixels = (self.window_size[0] - self.border_size[0],
                                     self.window_size[1] - self.border_size[1])
 
-            # make grid, randomly select which cells in grid to use
-            grid_x = np.arange(1, self.grid_size[0] + 1)
-            grid_y = np.arange(1, self.grid_size[1] + 1)
-            xx, yy = np.meshgrid(grid_x, grid_y)
-            xx = xx.ravel()
+            # make grid, randomly select which cells in grid to use.
+            grid_y = np.arange(1, self.grid_size[0] + 1)
+            grid_x = np.arange(1, self.grid_size[1] + 1)
+            yy, xx = np.meshgrid(grid_y, grid_x)
             yy = yy.ravel()
+            xx = xx.ravel()
             num_cells = self.grid_size[0] * self.grid_size[1]
             cells_to_use = sorted(np.random.choice(np.arange(num_cells),
                                                    size=set_size,
                                                    replace=False))
 
-            xx_to_use = xx[cells_to_use]
             yy_to_use = yy[cells_to_use]
+            xx_to_use = xx[cells_to_use]
 
             # find centers of cells we're going to use
-            cell_width = round(grid_size_pixels[0] / self.grid_size[0])
-            cell_x_center = round((grid_size_pixels[0] / self.grid_size[0]) / 2)
-            xx_to_use_ctr = (xx_to_use * cell_width) - cell_x_center
-
-            cell_height = round(grid_size_pixels[1] / self.grid_size[1])
-            cell_y_center = round((grid_size_pixels[1] / self.grid_size[1]) / 2)
+            cell_height = round(grid_size_pixels[0] / self.grid_size[0])
+            cell_y_center = round((grid_size_pixels[0] / self.grid_size[0]) / 2)
             yy_to_use_ctr = (yy_to_use * cell_height) - cell_y_center
 
+            cell_width = round(grid_size_pixels[1] / self.grid_size[1])
+            cell_x_center = round((grid_size_pixels[1] / self.grid_size[1]) / 2)
+            xx_to_use_ctr = (xx_to_use * cell_width) - cell_x_center
+
             if self.border_size:
-                xx_to_use_ctr += round(self.border_size[0] / 2)
-                yy_to_use_ctr += round(self.border_size[1] / 2)
+                yy_to_use_ctr += round(self.border_size[0] / 2)
+                xx_to_use_ctr += round(self.border_size[1] / 2)
 
             # add jitter to those points
             jitter_high = self.jitter // 2
@@ -193,23 +197,23 @@ class AbstractStimMaker:
                     jitter_high -= 1
             jitter_range = np.arange(jitter_low, jitter_high + 1)
 
-            x_jitter = np.random.choice(jitter_range, size=xx_to_use.size)
-            xx_to_use_ctr += x_jitter
             y_jitter = np.random.choice(jitter_range, size=yy_to_use.size)
             yy_to_use_ctr += y_jitter
+            x_jitter = np.random.choice(jitter_range, size=xx_to_use.size)
+            xx_to_use_ctr += x_jitter
 
         else:  # if self.grid_size is None
             if self.border_size:
-                xx = np.arange(self.border_size[0] + (self.item_bbox_size[1] / 2),
-                               self.window_size[0] - (self.border_size[0] + (self.item_bbox_size[1] / 2) + 1),
+                yy = np.arange(self.border_size[0] + (self.item_bbox_size[0] / 2),
+                               self.window_size[0] - (self.border_size[0] + (self.item_bbox_size[0] / 2) + 1),
                                dtype=int)
-                yy = np.arange(self.border_size[1] + (self.item_bbox_size[1] / 2),
+                xx = np.arange(self.border_size[1] + (self.item_bbox_size[1] / 2),
                                self.window_size[1] - (self.border_size[1] + (self.item_bbox_size[1] / 2) + 1),
                                dtype=int)
             else:
+                yy = np.arange(self.item_bbox_size[0] / 2,
+                               self.window_size[0] - (self.item_bbox_size[0] / 2))
                 xx = np.arange(self.item_bbox_size[1] / 2,
-                               self.window_size[0] - (self.item_bbox_size[1] / 2))
-                yy = np.arange(self.item_bbox_size[1] / 2,
                                self.window_size[1] - (self.item_bbox_size[1] / 2))
 
             # draw center points at random
@@ -225,8 +229,8 @@ class AbstractStimMaker:
                 coords_list = []
 
                 while less_than_set_size is True:
-                    xx_to_use_ctr = np.random.choice(xx)
                     yy_to_use_ctr = np.random.choice(yy)
+                    xx_to_use_ctr = np.random.choice(xx)
                     coord = [xx_to_use_ctr, yy_to_use_ctr]
                     draws_inner += 1
                     if draws_inner > MAX_DRAWS_INNER:
@@ -241,8 +245,8 @@ class AbstractStimMaker:
                             less_than_set_size = False
                             dists_are_good = True
                             # make into an array of size (1,) to prevent crash when we index into them below
-                            xx_to_use_ctr = np.asarray([xx_to_use_ctr])
                             yy_to_use_ctr = np.asarray([yy_to_use_ctr])
+                            xx_to_use_ctr = np.asarray([xx_to_use_ctr])
                     else:
                         coords_list_tmp = list(coords_list)
                         coords_list_tmp.append(coord)
@@ -258,13 +262,15 @@ class AbstractStimMaker:
                                 continue
                             else:
                                 coords = np.asarray(coords_list)
-                                xx_to_use_ctr = coords[:, 0]
                                 yy_to_use_ctr = coords[:, 1]
+                                xx_to_use_ctr = coords[:, 0]
                                 dists_are_good = True
                                 less_than_set_size = False
 
         # set up window
-        display_surface = pygame.display.set_mode(self.window_size, 0, 32)
+        display_surface = pygame.display.set_mode((self.window_size[1], self.window_size[0]),
+                                                  0,
+                                                  32)
 
         # draw on surface object
         display_surface.fill(colors_dict['black'])
@@ -279,7 +285,8 @@ class AbstractStimMaker:
             grid_as_char = None
 
         for item in range(set_size):
-            rect_tuple = (0, 0) + self.item_bbox_size
+            # notice we are now using PyGame order of sizes, (width, height)
+            rect_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
             rect_to_draw = Rect(rect_tuple)
             center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
             rect_to_draw.center = center
