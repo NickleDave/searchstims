@@ -126,7 +126,7 @@ class RectangleConfig:
     border_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                           default=None)
     min_center_dist = attr.ib(validator=optional(instance_of(int)), default=None)
-    jitter = attr.ib(validator=instance_of(int), default=5)
+    jitter = attr.ib(validator=optional(instance_of(int)), default=5)
     target_color = attr.ib(validator=instance_of(str), default='red')
     distractor_color = attr.ib(validator=instance_of(str), default='green')
 
@@ -188,7 +188,7 @@ class NumberConfig:
     border_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                           default=None)
     min_center_dist = attr.ib(validator=optional(instance_of(int)), default=None)
-    jitter = attr.ib(validator=instance_of(int), default=5)
+    jitter = attr.ib(validator=optional(instance_of(int)), default=5)
     target_color = attr.ib(validator=instance_of(str), default='white')
     distractor_color = attr.ib(validator=instance_of(str), default='white')
     target_number = attr.ib(validator=[instance_of(int), number_validator], default=2)
