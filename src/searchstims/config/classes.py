@@ -41,11 +41,11 @@ class GeneralConfig:
     the attributes in the [GENERAL[ section (and thus the GeneralConfig instance that represents it).
 
     item_bbox_size : tuple
-        two element tuple, (width, height). The size of rectangles that contain
-        items (target + distractors) in the visual search stimulus.
+        two element tuple, (height, width). The size of the
+        "bounding box" that contains items (target + distractors) in the visual search stimulus.
         In order of (width, height) because that's what PyGame expects.
     image_size : tuple
-        two element tuple, (rows, columns). This will be the size of an input
+        two element tuple, (height, width). This will be the size of an input
         to the neural network architecture that you're training.
     grid_size : tuple
         two element tuple, (rows, columns). Represents the "grid" that the
@@ -53,7 +53,7 @@ class GeneralConfig:
         grid can contain an item (either the target or a distractor). The
         total number of cells will be rows * columns.
     border_size : tuple
-        two element tuple, (rows, columns). The size of the border between
+        two element tuple, (height, width). The size of the border between
         the actual end of the image and the grid of cells within the image
         that will contain the items (target + distractors).
         Useful if you are worried about edge effects.
@@ -88,13 +88,10 @@ class RectangleConfig:
     Attributes
     ----------
     item_bbox_size : tuple
-        two element tuple, (width, height). The size of rectangles that contain
-        items (target + distractors) in the visual search stimulus.
-        For RectangleConfig this is literally the size of the rectangles that are
-        displayed on the visual search stimulus. Default is (10, 30).
-        In order of (width, height) because that's what PyGame expects.
+        two element tuple, (height, width). The size of the
+        "bounding box" that contains items (target + distractors) in the visual search stimulus.
     image_size : tuple
-        two element tuple, (rows, columns). This will be the size of an input
+        two element tuple, (height, width). This will be the size of an input
         to the neural network architecture that you're training.
     grid_size : tuple
         two element tuple, (rows, columns). Represents the "grid" that the
@@ -102,7 +99,7 @@ class RectangleConfig:
         grid can contain an item (either the target or a distractor). The
         total number of cells will be rows * columns.
     border_size : tuple
-        two element tuple, (rows, columns). The size of the border between
+        two element tuple, (height, width). The size of the border between
         the actual end of the image and the grid of cells within the image
         that will contain the items (target + distractors).
         Optional; default is None. Useful if you are worried about edge effects.
@@ -112,6 +109,9 @@ class RectangleConfig:
         Optional; default is None.
     jitter : int
         maximum value of jitter applied to center points of items. Default is 5.
+    rectangle_size : tuple
+        two element tuple, (height, width). The size of the rectangle plotted
+        inside the item bounding box. Default is (10, 30).
     target_color : str
         color of target. For RectangleConfig, default is 'red'.
     distractor_color : str
@@ -149,13 +149,12 @@ class NumberConfig:
     Attributes
     ----------
     item_bbox_size : tuple
-        two element tuple, (width, height). The size of rectangles that contain
-        items (target + distractors) in the visual search stimulus.
+        two element tuple, (height, width). The size of the
+        "bounding box" that contains items (target + distractors) in the visual search stimulus.
         For NumberConfig this must be the size of the .png images that contain the
         number shapes, (30, 30).
-        In order of (width, height) because that's what PyGame expects.
     image_size : tuple
-        two element tuple, (rows, columns). This will be the size of an input
+        two element tuple, (height, width). This will be the size of an input
         to the neural network architecture that you're training.
     grid_size : tuple
         two element tuple, (rows, columns). Represents the "grid" that the
@@ -163,7 +162,7 @@ class NumberConfig:
         grid can contain an item (either the target or a distractor). The
         total number of cells will be rows * columns.
     border_size : tuple
-        two element tuple, (rows, columns). The size of the border between
+        two element tuple, (height, width). The size of the border between
         the actual end of the image and the grid of cells within the image
         that will contain the items (target + distractors).
         Optional; default is None. Useful if you are worried about edge effects.
