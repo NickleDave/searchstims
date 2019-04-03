@@ -34,12 +34,51 @@ class GeneralConfig:
         If specified in this section and not specified in the section for a specific stimulus,
         then this value will be used. If specified in another section, that value overrides
         this one.
+
+    The remaining attributes, if declared as options and assigned values in the [GENERAL] section
+    of a config.ini file, will be used for all stimuli *unless* the same options are declared in
+    a section for a specific stimulus, in which case those values override the values assigned to
+    the attributes in the [GENERAL[ section (and thus the GeneralConfig instance that represents it).
+
+    rects_width_height : tuple
+        two element tuple, (width, height). The size of rectangles that contain
+        items (target + distractors) in the visual search stimulus.
+        In order of (width, height) because that's what PyGame expects.
+    image_size : tuple
+        two element tuple, (rows, columns). This will be the size of an input
+        to the neural network architecture that you're training.
+    grid_size : tuple
+        two element tuple, (rows, columns). Represents the "grid" that the
+        visuals search stimulus is divided into, where each cell in that
+        grid can contain an item (either the target or a distractor). The
+        total number of cells will be rows * columns.
+    border_size : tuple
+        two element tuple, (rows, columns). The size of the border between
+        the actual end of the image and the grid of cells within the image
+        that will contain the items (target + distractors).
+        Useful if you are worried about edge effects.
+    min_center_dist : int
+        minimum distance to maintain between the center of items.
+        Useful if you are worried about crowding effects.
+    jitter : int
+        maximum value of jitter applied to center points of items.
     """
     output_dir = attr.ib(validator=instance_of(str))
     json_filename = attr.ib(validator=instance_of(str))
     num_target_present = attr.ib(converter=converters.optional(int))
     num_target_absent = attr.ib(converter=converters.optional(int))
     set_sizes = attr.ib(validator=optional(instance_of(list)))
+
+    rects_width_height = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                                 default=None)
+    image_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                         default=None)
+    grid_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                        default=None)
+    border_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                          default=None)
+    min_center_dist = attr.ib(validator=optional(instance_of(int)), default=None)
+    jitter = attr.ib(validator=optional(instance_of(int)), default=None)
 
 
 @attr.s
