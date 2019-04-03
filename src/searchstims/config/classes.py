@@ -40,7 +40,7 @@ class GeneralConfig:
     a section for a specific stimulus, in which case those values override the values assigned to
     the attributes in the [GENERAL[ section (and thus the GeneralConfig instance that represents it).
 
-    rects_width_height : tuple
+    item_bbox_size : tuple
         two element tuple, (width, height). The size of rectangles that contain
         items (target + distractors) in the visual search stimulus.
         In order of (width, height) because that's what PyGame expects.
@@ -69,7 +69,7 @@ class GeneralConfig:
     num_target_absent = attr.ib(converter=converters.optional(int))
     set_sizes = attr.ib(validator=optional(instance_of(list)))
 
-    rects_width_height = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+    item_bbox_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                                  default=None)
     image_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                          default=None)
@@ -87,7 +87,7 @@ class RectangleConfig:
 
     Attributes
     ----------
-    rects_width_height : tuple
+    item_bbox_size : tuple
         two element tuple, (width, height). The size of rectangles that contain
         items (target + distractors) in the visual search stimulus.
         For RectangleConfig this is literally the size of the rectangles that are
@@ -117,7 +117,7 @@ class RectangleConfig:
     distractor_color : str
         color of target. For RectangleConfig, default is 'green'.
     """
-    rects_width_height = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+    item_bbox_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                                  default=(10, 30))
     image_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                          default=(227, 227))
@@ -148,7 +148,7 @@ class NumberConfig:
 
     Attributes
     ----------
-    rects_width_height : tuple
+    item_bbox_size : tuple
         two element tuple, (width, height). The size of rectangles that contain
         items (target + distractors) in the visual search stimulus.
         For NumberConfig this must be the size of the .png images that contain the
@@ -179,7 +179,7 @@ class NumberConfig:
     target_number : int
     distractor_number : int
     """
-    rects_width_height = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+    item_bbox_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                                  default=(30, 30))
     image_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                          default=(227, 227))

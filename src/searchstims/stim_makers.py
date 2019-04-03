@@ -45,7 +45,7 @@ class AbstractStimMaker:
                  border_size=None,
                  grid_size=(5, 5),
                  min_center_dist=None,
-                 rects_width_height=(10, 30),
+                 item_bbox_size=(10, 30),
                  jitter=5):
         """__init__ function for Stim Makers
 
@@ -68,7 +68,7 @@ class AbstractStimMaker:
             Minimum distance between center point of items. Default is None, in
             which case any distance is permitted. Only used if grid_size is None
             and items are placed randomly instead of on a grid.
-        rects_width_height : tuple
+        item_bbox_size : tuple
             shape of pygame Rect objects that will be plotted,
             (width, height) in pixels. Default is (10, 30).
         jitter : int
@@ -92,7 +92,7 @@ class AbstractStimMaker:
         self.min_center_dist = min_center_dist
         self.window_size = window_size
         self.border_size = border_size
-        self.rects_width_height = rects_width_height
+        self.item_bbox_size = item_bbox_size
         self.jitter = jitter
 
     def _return_rect_for_stim(self, display_surface, rect_to_draw, is_target):
@@ -200,17 +200,17 @@ class AbstractStimMaker:
 
         else:  # if self.grid_size is None
             if self.border_size:
-                xx = np.arange(self.border_size[0] + (self.rects_width_height[1] / 2),
-                               self.window_size[0] - (self.border_size[0] + (self.rects_width_height[1] / 2) + 1),
+                xx = np.arange(self.border_size[0] + (self.item_bbox_size[1] / 2),
+                               self.window_size[0] - (self.border_size[0] + (self.item_bbox_size[1] / 2) + 1),
                                dtype=int)
-                yy = np.arange(self.border_size[1] + (self.rects_width_height[1] / 2),
-                               self.window_size[1] - (self.border_size[1] + (self.rects_width_height[1] / 2) + 1),
+                yy = np.arange(self.border_size[1] + (self.item_bbox_size[1] / 2),
+                               self.window_size[1] - (self.border_size[1] + (self.item_bbox_size[1] / 2) + 1),
                                dtype=int)
             else:
-                xx = np.arange(self.rects_width_height[1] / 2,
-                               self.window_size[0] - (self.rects_width_height[1] / 2))
-                yy = np.arange(self.rects_width_height[1] / 2,
-                               self.window_size[1] - (self.rects_width_height[1] / 2))
+                xx = np.arange(self.item_bbox_size[1] / 2,
+                               self.window_size[0] - (self.item_bbox_size[1] / 2))
+                yy = np.arange(self.item_bbox_size[1] / 2,
+                               self.window_size[1] - (self.item_bbox_size[1] / 2))
 
             # draw center points at random
             dists_are_good = False
@@ -279,7 +279,7 @@ class AbstractStimMaker:
             grid_as_char = None
 
         for item in range(set_size):
-            rect_tuple = (0, 0) + self.rects_width_height
+            rect_tuple = (0, 0) + self.item_bbox_size
             rect_to_draw = Rect(rect_tuple)
             center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
             rect_to_draw.center = center
@@ -342,7 +342,7 @@ class NumberStimMaker(AbstractStimMaker):
                  min_center_dist=None,
                  window_size=(227, 227),
                  border_size=None,
-                 rects_width_height=(30, 30),
+                 item_bbox_size=(30, 30),
                  jitter=5,
                  target_number=2,
                  distractor_number=5):
@@ -362,7 +362,7 @@ class NumberStimMaker(AbstractStimMaker):
                          border_size=border_size,
                          grid_size=grid_size,
                          min_center_dist=min_center_dist,
-                         rects_width_height=rects_width_height,
+                         item_bbox_size=item_bbox_size,
                          jitter=jitter)
         self.target_number = target_number
         self.distractor_number = distractor_number
