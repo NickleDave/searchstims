@@ -118,7 +118,7 @@ class RectangleConfig:
         color of target. For RectangleConfig, default is 'green'.
     """
     item_bbox_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
-                                 default=(10, 30))
+                                 default=(30, 30))
     image_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                          default=(227, 227))
     grid_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
