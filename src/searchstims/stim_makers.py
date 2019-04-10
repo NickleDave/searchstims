@@ -328,13 +328,13 @@ class RectangleStimMaker(AbstractStimMaker):
     """Make visual search stimuli with vertical rectangles
     where target is different color form distractor.
     Considered a stimulus that allows for 'efficient' search."""
-    def _return_rect_for_stim(self, display_surface, rect_to_draw, is_target):
+    def draw_item(self, display_surface, item_bbox, is_target):
         if is_target:
             color = self.target_color
         else:
             color = self.distractor_color
-        rect = pygame.draw.rect(display_surface, colors_dict[color], rect_to_draw)
-        return rect
+        pygame.draw.rect(display_surface, colors_dict[color], item_bbox)
+
 
 
 class NumberStimMaker(AbstractStimMaker):
