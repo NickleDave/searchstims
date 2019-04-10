@@ -287,7 +287,6 @@ class AbstractStimMaker:
         display_surface.fill(colors_dict['black'])
         target_inds = np.random.choice(np.arange(set_size),
                                        size=num_target).tolist()
-        rects = []
         target_indices = []
         distractor_indices = []
         if self.grid_size:
@@ -297,10 +296,10 @@ class AbstractStimMaker:
 
         for item in range(set_size):
             # notice we are now using PyGame order of sizes, (width, height)
-            rect_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
-            rect_to_draw = Rect(rect_tuple)
+            item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
+            item_bbox = Rect(item_bbox_tuple)
             center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
-            rect_to_draw.center = center
+            item_bbox.center = center
             if item in target_inds:
                 is_target = True
                 target_indices.append(center)
@@ -311,10 +310,9 @@ class AbstractStimMaker:
                 distractor_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 'd'
-            curr_rect = self._return_rect_for_stim(display_surface=display_surface,
-                                                   rect_to_draw=rect_to_draw,
-                                                   is_target=is_target)
-            rects.append(curr_rect)
+            self.draw_item(display_surface=display_surface,
+                           item_bbox=item_bbox,
+                           is_target=is_target)
 
         if self.grid_size:
             grid_as_char = np.asarray(grid_as_char).reshape(self.grid_size[0], self.grid_size[1]).tolist()
