@@ -9,6 +9,24 @@ VALID_STIM_SECTIONS = [
     'number'
 ]
 
+COMMON_ARGS = [
+        'image_size',
+        'border_size',
+        'grid_size',
+        'min_center_dist',
+        'item_bbox_size',
+        'jitter',
+]
+
+def _get_common_args_from_stim_or_general(stim_config, general_config):
+    common_args = []
+    for this_attr in COMMON_ARGS:
+        this_arg = getattr(stim_config, this_attr)
+        if this_arg is None:
+            this_arg = getattr(general_config, this_attr)
+        common_args.append(this_arg)
+    return tuple(common_args)
+
 
 def make(config_obj):
     """actual function that makes all the stimuli
@@ -83,31 +101,37 @@ def make(config_obj):
     # e.g. fnames_set_size_8_target_present = [stim_info['filename'] for stim_info in out_dict[8]['present']]
     out_dict = {}
 
+    # import pdb;pdb.set_trace()
+
     for section in VALID_STIM_SECTIONS:
         if getattr(config_obj, section) is not None:
             if section == 'rectangle':
-                init_config = config_obj.rectangle
-                stim_maker = stim_makers.RectangleStimMaker(target_color=init_config.target_color,
-                                                            distractor_color=init_config.distractor_color,
-                                                            window_size=init_config.image_size,
-                                                            border_size=init_config.border_size,
-                                                            grid_size=init_config.grid_size,
-                                                            min_center_dist=init_config.min_center_dist,
-                                                            rects_width_height=init_config.rects_width_height,
-                                                            jitter=init_config.jitter
+                stim_config = config_obj.rectangle
+                (image_size, border_size, grid_size, min_center_dist,
+                 item_bbox_size, jitter) = _get_common_args_from_stim_or_general(stim_config, general_config)
+                stim_maker = stim_makers.RectangleStimMaker(target_color=stim_config.target_color,
+                                                            distractor_color=stim_config.distractor_color,
+                                                            window_size=image_size,
+                                                            border_size=border_size,
+                                                            grid_size=grid_size,
+                                                            min_center_dist=min_center_dist,
+                                                            item_bbox_size=item_bbox_size,
+                                                            jitter=jitter
                                                             )
             elif section == 'number':
-                init_config = config_obj.number
-                stim_maker = stim_makers.NumberStimMaker(target_color=init_config.target_color,
-                                                         distractor_color=init_config.distractor_color,
-                                                         window_size=init_config.image_size,
-                                                         border_size=init_config.border_size,
-                                                         grid_size=init_config.grid_size,
-                                                         min_center_dist=init_config.min_center_dist,
-                                                         rects_width_height=init_config.rects_width_height,
-                                                         jitter=init_config.jitter,
-                                                         target_number=init_config.target_number,
-                                                         distractor_number=init_config.distractor_number
+                stim_config = config_obj.number
+                (image_size, border_size, grid_size, min_center_dist,
+                 item_bbox_size, jitter) = _get_common_args_from_stim_or_general(stim_config, general_config)
+                stim_maker = stim_makers.NumberStimMaker(target_color=stim_config.target_color,
+                                                         distractor_color=stim_config.distractor_color,
+                                                         window_size=image_size,
+                                                         border_size=border_size,
+                                                         grid_size=grid_size,
+                                                         min_center_dist=min_center_dist,
+                                                         item_bbox_size=item_bbox_size,
+                                                         jitter=jitter,
+                                                         target_number=stim_config.target_number,
+                                                         distractor_number=stim_config.distractor_number
                                                          )
             this_section_output_dir = os.path.join(root_output_dir, section)
 

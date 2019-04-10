@@ -3,6 +3,10 @@ import attr
 from attr.validators import instance_of, optional
 from attr import converters
 
+def check_len_is_two(instance, attribute, value):
+    if len(value) != 2:
+        raise ValueError(f"{attribute.name} tuple for {instance.name} should be two elements, got {value}")
+
 
 @attr.s
 class GeneralConfig:
@@ -30,6 +34,34 @@ class GeneralConfig:
         If specified in this section and not specified in the section for a specific stimulus,
         then this value will be used. If specified in another section, that value overrides
         this one.
+
+    The remaining attributes, if declared as options and assigned values in the [GENERAL] section
+    of a config.ini file, will be used for all stimuli *unless* the same options are declared in
+    a section for a specific stimulus, in which case those values override the values assigned to
+    the attributes in the [GENERAL[ section (and thus the GeneralConfig instance that represents it).
+
+    item_bbox_size : tuple
+        two element tuple, (height, width). The size of the
+        "bounding box" that contains items (target + distractors) in the visual search stimulus.
+        In order of (width, height) because that's what PyGame expects.
+    image_size : tuple
+        two element tuple, (height, width). This will be the size of an input
+        to the neural network architecture that you're training.
+    grid_size : tuple
+        two element tuple, (rows, columns). Represents the "grid" that the
+        visuals search stimulus is divided into, where each cell in that
+        grid can contain an item (either the target or a distractor). The
+        total number of cells will be rows * columns.
+    border_size : tuple
+        two element tuple, (height, width). The size of the border between
+        the actual end of the image and the grid of cells within the image
+        that will contain the items (target + distractors).
+        Useful if you are worried about edge effects.
+    min_center_dist : int
+        minimum distance to maintain between the center of items.
+        Useful if you are worried about crowding effects.
+    jitter : int
+        maximum value of jitter applied to center points of items.
     """
     output_dir = attr.ib(validator=instance_of(str))
     json_filename = attr.ib(validator=instance_of(str))
@@ -37,11 +69,16 @@ class GeneralConfig:
     num_target_absent = attr.ib(converter=converters.optional(int))
     set_sizes = attr.ib(validator=optional(instance_of(list)))
 
-
-# ----------------- validator functions used by RectangleConfig and NumberConfig ---------------------------------------
-def check_border_size(instance, attribute, value):
-    if len(value) != 2:
-        raise ValueError(f"border size tuple should be two elements, got {value}")
+    item_bbox_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                                 default=None)
+    image_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                         default=None)
+    grid_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                        default=None)
+    border_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                          default=None)
+    min_center_dist = attr.ib(validator=optional(instance_of(int)), default=None)
+    jitter = attr.ib(validator=optional(instance_of(int)), default=None)
 
 
 @attr.s
@@ -50,14 +87,11 @@ class RectangleConfig:
 
     Attributes
     ----------
-    rects_width_height : tuple
-        two element tuple, (width, height). The size of rectangles that contain
-        items (target + distractors) in the visual search stimulus.
-        For RectangleConfig this is literally the size of the rectangles that are
-        displayed on the visual search stimulus. Default is (10, 30).
-        In order of (width, height) because that's what PyGame expects.
+    item_bbox_size : tuple
+        two element tuple, (height, width). The size of the
+        "bounding box" that contains items (target + distractors) in the visual search stimulus.
     image_size : tuple
-        two element tuple, (rows, columns). This will be the size of an input
+        two element tuple, (height, width). This will be the size of an input
         to the neural network architecture that you're training.
     grid_size : tuple
         two element tuple, (rows, columns). Represents the "grid" that the
@@ -65,7 +99,7 @@ class RectangleConfig:
         grid can contain an item (either the target or a distractor). The
         total number of cells will be rows * columns.
     border_size : tuple
-        two element tuple, (rows, columns). The size of the border between
+        two element tuple, (height, width). The size of the border between
         the actual end of the image and the grid of cells within the image
         that will contain the items (target + distractors).
         Optional; default is None. Useful if you are worried about edge effects.
@@ -75,33 +109,24 @@ class RectangleConfig:
         Optional; default is None.
     jitter : int
         maximum value of jitter applied to center points of items. Default is 5.
+    rectangle_size : tuple
+        two element tuple, (height, width). The size of the rectangle plotted
+        inside the item bounding box. Default is (10, 30).
     target_color : str
         color of target. For RectangleConfig, default is 'red'.
     distractor_color : str
         color of target. For RectangleConfig, default is 'green'.
     """
-    rects_width_height = attr.ib(validator=instance_of(tuple), default=(10, 30))
-    @rects_width_height.validator
-    def check_rects_width_height(self, attribute, value):
-        if len(value) != 2:
-            raise ValueError(f"rects_width_height tuple should be two elements, got {value}")
-
-    image_size = attr.ib(validator=instance_of(tuple), default=(227, 227))
-    @image_size.validator
-    def check_image_size(self, attribute, value):
-        if len(value) != 2:
-            raise ValueError(f"image_size tuple should be two elements, got {value}")
-
-    grid_size = attr.ib(validator=instance_of(tuple), default=(5,5))
-    @grid_size.validator
-    def check_grid_size(self, attribute, value):
-        if len(value) != 2:
-            raise ValueError(f"grid size tuple should be two elements, got {value}")
-
-    border_size = attr.ib(validator=optional([instance_of(tuple), check_border_size]),
+    item_bbox_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                                 default=(30, 30))
+    image_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                         default=(227, 227))
+    grid_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                        default=(5,5))
+    border_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                           default=None)
     min_center_dist = attr.ib(validator=optional(instance_of(int)), default=None)
-    jitter = attr.ib(validator=instance_of(int), default=5)
+    jitter = attr.ib(validator=optional(instance_of(int)), default=5)
     target_color = attr.ib(validator=instance_of(str), default='red')
     distractor_color = attr.ib(validator=instance_of(str), default='green')
 
@@ -123,14 +148,13 @@ class NumberConfig:
 
     Attributes
     ----------
-    rects_width_height : tuple
-        two element tuple, (width, height). The size of rectangles that contain
-        items (target + distractors) in the visual search stimulus.
+    item_bbox_size : tuple
+        two element tuple, (height, width). The size of the
+        "bounding box" that contains items (target + distractors) in the visual search stimulus.
         For NumberConfig this must be the size of the .png images that contain the
         number shapes, (30, 30).
-        In order of (width, height) because that's what PyGame expects.
     image_size : tuple
-        two element tuple, (rows, columns). This will be the size of an input
+        two element tuple, (height, width). This will be the size of an input
         to the neural network architecture that you're training.
     grid_size : tuple
         two element tuple, (rows, columns). Represents the "grid" that the
@@ -138,7 +162,7 @@ class NumberConfig:
         grid can contain an item (either the target or a distractor). The
         total number of cells will be rows * columns.
     border_size : tuple
-        two element tuple, (rows, columns). The size of the border between
+        two element tuple, (height, width). The size of the border between
         the actual end of the image and the grid of cells within the image
         that will contain the items (target + distractors).
         Optional; default is None. Useful if you are worried about edge effects.
@@ -154,28 +178,16 @@ class NumberConfig:
     target_number : int
     distractor_number : int
     """
-    rects_width_height = attr.ib(validator=instance_of(tuple), default=(30, 30))
-    @rects_width_height.validator
-    def check_rects_width_height(self, attribute, value):
-        if len(value) != 2:
-            raise ValueError(f"rects_width_height tuple should be two elements, got {value}")
-
-    image_size = attr.ib(validator=instance_of(tuple), default=(227, 227))
-    @image_size.validator
-    def check_image_size(self, attribute, value):
-        if len(value) != 2:
-            raise ValueError(f"image_size tuple should be two elements, got {value}")
-
-    grid_size = attr.ib(validator=instance_of(tuple), default=(5,5))
-    @grid_size.validator
-    def check_grid_size(self, attribute, value):
-        if len(value) != 2:
-            raise ValueError(f"grid size tuple should be two elements, got {value}")
-
-    border_size = attr.ib(validator=optional([instance_of(tuple), check_border_size]),
+    item_bbox_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                                 default=(30, 30))
+    image_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                         default=(227, 227))
+    grid_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
+                        default=(5,5))
+    border_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                           default=None)
     min_center_dist = attr.ib(validator=optional(instance_of(int)), default=None)
-    jitter = attr.ib(validator=instance_of(int), default=5)
+    jitter = attr.ib(validator=optional(instance_of(int)), default=5)
     target_color = attr.ib(validator=instance_of(str), default='white')
     distractor_color = attr.ib(validator=instance_of(str), default='white')
     target_number = attr.ib(validator=[instance_of(int), number_validator], default=2)
