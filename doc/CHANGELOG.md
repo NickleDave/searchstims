@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] 2019-04-10
+### Added
+- possible to specify options that are common to all stimuli in [GENERAL] section
+of config.ini file
+  + e.g., image_size, item_bbox_size, jitter, grid_size
+  + if one of these options is also specified in a section for a specific stimulus,
+  that value overrides the one specified in the general section
+
+### Changed
+- user specifies an item bounding box for items in stimulus, instead of 'rect'
+  + the actual item is drawn within this "bounding box"
+  + would make it possible to draw items with different sizes but same shape
+- user specifies sizes in order of (height, width)
+  + since people feeding images to neural networks are used to this order
+  + even though PyGame expects (width, height)
+
+
 ## [0.3.0a1] 2019-03-29
 ### Added
 - possible to make multiple types of stimuli with a single config file
