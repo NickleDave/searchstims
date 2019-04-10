@@ -95,10 +95,21 @@ class AbstractStimMaker:
         self.item_bbox_size = item_bbox_size
         self.jitter = jitter
 
-    def _return_rect_for_stim(self, display_surface, rect_to_draw, is_target):
-        """this function must return a pygame.rect object
-        which the StimMaker.make_stim method will `blit` on
-        the stimulus."""
+    def draw_item(self, display_surface, item_bbox, is_target):
+        """draw item for visual search stimulus
+
+        Parameters
+        ----------
+        display_surface : pygame.Surface
+        item_bbox : pygame.rect
+            item bounding box. The actual item is drawn
+            *within* this bounding box.
+        is_target : bool
+            if True, item to be drawn is a target.
+            if False, item to be drawn is a distractor.
+            How the item is drawn (color, orientation, shape, etc.) will
+            depend on whether this is True or False
+        """
         raise NotImplementedError
 
     def make_stim(self,
