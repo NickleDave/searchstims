@@ -63,13 +63,13 @@ class AbstractStimMaker:
             Default is None.
         grid_size : tuple
             of length two, representing the number of (rows, columns)
-            in the grid on which tareget and distractors will be located.
+            in the grid on which target and distractors will be located.
         min_center_dist : int
             Minimum distance between center point of items. Default is None, in
             which case any distance is permitted. Only used if grid_size is None
             and items are placed randomly instead of on a grid.
         item_bbox_size : tuple
-            shape of pygame Rect objects that will be plotted,
+            shape of "bounding box" that contains items to be plotted,
             (height, width) in pixels. Default is (30, 30).
         jitter : int
             number of pixels to jitter each 'item' in the 'set'
