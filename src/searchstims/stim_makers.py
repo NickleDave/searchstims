@@ -391,10 +391,9 @@ class NumberStimMaker(AbstractStimMaker):
                                                               self.distractor_color)])
         self.distractor = pygame.image.load(self.distractor_png)
 
-    def _return_rect_for_stim(self, display_surface, rect_to_draw, is_target):
+    def draw_item(self, display_surface, item_bbox, is_target):
         """Returns target or distractor"""
         if is_target:
-            rect = display_surface.blit(self.target, rect_to_draw)
+            display_surface.blit(self.target, item_bbox)
         else:
-            rect = display_surface.blit(self.distractor, rect_to_draw)
-        return rect
+            display_surface.blit(self.distractor, item_bbox)
