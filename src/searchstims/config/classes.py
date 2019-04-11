@@ -19,31 +19,24 @@ class GeneralConfig:
         should be saved
     json_filename : str
         name of .json file that will be created with information about images created
-    num_target_present : int
-        number of visual search stimuli to generate with target present.
-        If specified in this section and not specified in the section for a specific stimulus,
-        then this value will be used. If specified in another section, that value overrides
-        this one.
-    num_target_absent : int
-        number of visual search stimuli to generate with target absent
-        If specified in this section and not specified in the section for a specific stimulus,
-        then this value will be used. If specified in another section, that value overrides
-        this one.
-    set_sizes : list
-        of int, "set sizes" that should be generated
-        If specified in this section and not specified in the section for a specific stimulus,
-        then this value will be used. If specified in another section, that value overrides
-        this one.
+    enforce_unique : bool
+        if True, ensures that each stimulus is unique by drawing without replacement all
+        item locations *before* generating any of the stimuli
 
     The remaining attributes, if declared as options and assigned values in the [GENERAL] section
     of a config.ini file, will be used for all stimuli *unless* the same options are declared in
     a section for a specific stimulus, in which case those values override the values assigned to
     the attributes in the [GENERAL[ section (and thus the GeneralConfig instance that represents it).
 
+    num_target_present : int
+        number of visual search stimuli to generate with target present.
+    num_target_absent : int
+        number of visual search stimuli to generate with target absent
+    set_sizes : list
+        of int, "set sizes" that should be generated
     item_bbox_size : tuple
         two element tuple, (height, width). The size of the
         "bounding box" that contains items (target + distractors) in the visual search stimulus.
-        In order of (width, height) because that's what PyGame expects.
     image_size : tuple
         two element tuple, (height, width). This will be the size of an input
         to the neural network architecture that you're training.
@@ -68,7 +61,7 @@ class GeneralConfig:
     num_target_present = attr.ib(converter=converters.optional(int))
     num_target_absent = attr.ib(converter=converters.optional(int))
     set_sizes = attr.ib(validator=optional(instance_of(list)))
-
+    enforce_unique = attr.ib(validator=optional(instance_of(bool)), default=True)
     item_bbox_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
                                  default=None)
     image_size = attr.ib(validator=optional([instance_of(tuple), check_len_is_two]),
