@@ -101,8 +101,6 @@ def make(config_obj):
     # e.g. fnames_set_size_8_target_present = [stim_info['filename'] for stim_info in out_dict[8]['present']]
     out_dict = {}
 
-    # import pdb;pdb.set_trace()
-
     for section in VALID_STIM_SECTIONS:
         if getattr(config_obj, section) is not None:
             if section == 'rectangle':
