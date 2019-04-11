@@ -95,6 +95,29 @@ class AbstractStimMaker:
         self.item_bbox_size = item_bbox_size
         self.jitter = jitter
 
+        if self.grid_size:
+            self.num_cells = self.grid_size[0] * self.grid_size[1]
+
+            if self.border_size is None:
+                self.grid_size_pixels = self.window_size
+            else:
+                self.grid_size_pixels = (self.window_size[0] - self.border_size[0],
+                                         self.window_size[1] - self.border_size[1])
+
+            # make grid, randomly select which cells in grid to use.
+            grid_y = np.arange(1, self.grid_size[0] + 1)
+            grid_x = np.arange(1, self.grid_size[1] + 1)
+            yy, xx = np.meshgrid(grid_y, grid_x)
+            self.yy = yy.ravel()
+            self.xx = xx.ravel()
+
+            # find centers of cells we're going to use
+            self.cell_height = round(self.grid_size_pixels[0] / self.grid_size[0])
+            self.cell_y_center = round((self.grid_size_pixels[0] / self.grid_size[0]) / 2)
+
+            self.cell_width = round(self.grid_size_pixels[1] / self.grid_size[1])
+            self.cell_x_center = round((self.grid_size_pixels[1] / self.grid_size[1]) / 2)
+
     def draw_item(self, display_surface, item_bbox, is_target):
         """draw item for visual search stimulus
 
