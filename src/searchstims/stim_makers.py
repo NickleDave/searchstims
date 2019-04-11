@@ -185,34 +185,19 @@ class AbstractStimMaker:
         # specified in order of (height, width). So size[0] = y and size[1] = x   #
         ###########################################################################
         if self.grid_size:
-            if self.border_size is None:
-                grid_size_pixels = self.window_size
-            else:
-                grid_size_pixels = (self.window_size[0] - self.border_size[0],
-                                    self.window_size[1] - self.border_size[1])
 
-            # make grid, randomly select which cells in grid to use.
-            grid_y = np.arange(1, self.grid_size[0] + 1)
-            grid_x = np.arange(1, self.grid_size[1] + 1)
-            yy, xx = np.meshgrid(grid_y, grid_x)
-            yy = yy.ravel()
-            xx = xx.ravel()
-            num_cells = self.grid_size[0] * self.grid_size[1]
-            cells_to_use = sorted(np.random.choice(np.arange(num_cells),
-                                                   size=set_size,
-                                                   replace=False))
+            if cells_to_use is None:
+                cells_to_use = sorted(np.random.choice(np.arange(self.num_cells),
+                                                       size=set_size,
+                                                       replace=False))
 
-            yy_to_use = yy[cells_to_use]
-            xx_to_use = xx[cells_to_use]
+            yy_to_use = self.yy[cells_to_use]
+            xx_to_use = self.xx[cells_to_use]
 
             # find centers of cells we're going to use
-            cell_height = round(grid_size_pixels[0] / self.grid_size[0])
-            cell_y_center = round((grid_size_pixels[0] / self.grid_size[0]) / 2)
-            yy_to_use_ctr = (yy_to_use * cell_height) - cell_y_center
+            yy_to_use_ctr = (yy_to_use * self.cell_height) - self.cell_y_center
 
-            cell_width = round(grid_size_pixels[1] / self.grid_size[1])
-            cell_x_center = round((grid_size_pixels[1] / self.grid_size[1]) / 2)
-            xx_to_use_ctr = (xx_to_use * cell_width) - cell_x_center
+            xx_to_use_ctr = (xx_to_use * self.cell_width) - self.cell_x_center
 
             if self.border_size:
                 yy_to_use_ctr += round(self.border_size[0] / 2)
@@ -314,7 +299,7 @@ class AbstractStimMaker:
         target_indices = []
         distractor_indices = []
         if self.grid_size:
-            grid_as_char = [''] * num_cells
+            grid_as_char = [''] * self.num_cells
         else:
             grid_as_char = None
 
