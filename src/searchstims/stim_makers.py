@@ -138,6 +138,7 @@ class AbstractStimMaker:
     def make_stim(self,
                   set_size=8,
                   num_target=1,
+                  cells_to_use=None,
                   ):
         """make visual search stimuli
 
