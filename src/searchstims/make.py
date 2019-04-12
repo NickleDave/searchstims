@@ -36,11 +36,14 @@ def _get_common_args_from_stim_or_general(stim_config, general_config):
 
 def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
     # get all combinations of cells (combination because order doesn't matter, just which cells get used)
+    # a cell combination is an unordered set of k cells from a grid with a total of n cells
+    # e.g. if there are 25 cells in a 5x5 grid and you want all combinations k=1, then the
+    # cell_combs will be [(0,), (1,), (2,), ... (24,)] (representing each as a tuple)
+    # and all combinations k=2 will be [(0,1), (0,2), (0,3), ... (1,2), (1,3), ... (23, 24)]
+    # (there are no repeats; once we draw a cell we don't replace it since we just put one item in each cell)
     cell_combs = list(combinations(iterable=range(stim_maker.num_cells), r=set_size))
     if len(cell_combs) < num_imgs:
-        num_repeat = ceil(num_imgs / cell_combs)
-        all_cells_to_use = cell_combs * num_repeat
-        all_cells_to_use = cell_combs[:num_imgs]
+        num_repeat = ceil(num_imgs / len(cell_combs))
         make_jitter_unique = True
     else:
         # don't need to repeat any cell combinations; let's just sample without replacement
@@ -70,18 +73,34 @@ def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
 
         if make_jitter_unique:
             # get each unique pairing of possible cell combinations and possible x, y jitters
-            jitter_to_add = jitter_product
-            cell_and_jitter = list(product(all_cells_to_use, jitter_product))
-            if len(cell_and_jitter) < num_imgs:
+            cell_jitter_prod = list(product(cell_combs, jitter_product))
+            if len(cell_jitter_prod) < num_imgs:
                 raise ValueError('cannot generate unique x and y co-ordinates for items in number of images specified; '
                                  f'the product of the number of cell combinations {len(all_cells_to_use)} and the '
                                  f'possible jitter added {len(jitter_product)} is {len(cell_jitter_prod)}, but '
                                  f'the number of images to generate is {num_imgs}')
+            else:
+                cell_and_jitter = []
+                for this_cell_comb in cell_combs:
+                    this_cell_comb_with_all_jitter = [cell_jitter_tuple
+                                                      for cell_jitter_tuple in cell_jitter_prod
+                                                      if cell_jitter_tuple[0] == this_cell_comb]
+                    this_cell_comb_with_jitter = random.sample(population=this_cell_comb_with_all_jitter,
+                                                               k=num_repeat)
+                    cell_and_jitter.extend(this_cell_comb_with_jitter)
+                diff = len(cell_and_jitter) - num_imgs
+                # remove extras randomly instead of removing all from the last cell_comb
+                inds_to_remove = random.sample(range(len(cell_and_jitter)), k=diff)
+                inds_to_remove.sort(reverse=True)
+                for ind in inds_to_remove:
+                    cell_and_jitter.pop(ind)
+                all_cells_to_use = [cj_tup[0] for cj_tup in cell_and_jitter]
         else:
             jitter_rand = random.choices(jitter_product, k=len(all_cells_to_use))
-            jitter_to_add = jitter_rand
+            cell_and_jitter = zip(all_cells_to_use, jitter_rand)
     else:
-        jitter_to_add = None
+        jitter_none = [None] * len(all_cells_to_use)
+        cell_and_jitter = zip(all_cells_to_use, jitter_none)
 
     ###########################################################################
     # notice: below we always refer to y before x, because shapes are         #
@@ -89,7 +108,7 @@ def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
     ###########################################################################
     all_yy_to_use_ctr = []
     all_xx_to_use_ctr = []
-    for cells_to_use in all_cells_to_use:
+    for cells_to_use, jitter_to_add in cell_and_jitter:
         # need to cast to list and then array because converting a list with asarray returns a 1-dimensional
         # array, and indexing with this one-dimensional array returns another 1-d array. Using just a tuple
         # or an array made from a tuple will just return a single element when the tuple has only one element,
@@ -107,17 +126,13 @@ def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
             yy_to_use_ctr += round(stim_maker.border_size[0] / 2)
             xx_to_use_ctr += round(stim_maker.border_size[1] / 2)
 
+        if jitter_to_add:
+            yy_to_use_ctr += jitter_to_add[0]
+            xx_to_use_ctr += jitter_to_add[1]
+
         all_yy_to_use_ctr.append(yy_to_use_ctr)
         all_xx_to_use_ctr.append(xx_to_use_ctr)
 
-    if jitter_to_add:
-        for yy, xx, jitter_tuple in zip(all_yy_to_use_ctr, all_xx_to_use_ctr, jitter_to_add):
-            yy += jitter_tuple[0]
-            xx += jitter_tuple[1]
-
-    # convert all to numpy arrays
-    # all_xx_to_use_ctr = [np.asarray(xx_to_use_ctr) for xx_to_use_ctr in all_xx_to_use_ctr]
-    # all_yy_to_use_ctr = [np.asarray(yy_to_use_ctr) for yy_to_use_ctr in all_yy_to_use_ctr]
     return all_cells_to_use, all_xx_to_use_ctr, all_yy_to_use_ctr
 
 
