@@ -23,6 +23,7 @@ COMMON_ARGS = [
         'jitter',
 ]
 
+
 def _get_common_args_from_stim_or_general(stim_config, general_config):
     common_args = []
     for this_attr in COMMON_ARGS:
