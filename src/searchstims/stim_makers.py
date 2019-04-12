@@ -188,6 +188,8 @@ class AbstractStimMaker:
                   set_size=8,
                   num_target=1,
                   cells_to_use=None,
+                  xx_to_use_ctr=None,
+                  yy_to_use_ctr=None
                   ):
         """make visual search stimuli
 
