@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] 2019-04-12
+### Added
+- [GENERAL] section of config has `enforce_unique` option
+  + makes sure all images are unique when a grid is used
+  + option is True by default
+- added `imageio` as a dependency
+  + needed to open .png files for tests
+  + will be needed for other tests that look at actual images generated whenever they get written anyway
+
 ## [1.0.0] 2019-04-10
 ### Added
 - possible to specify options that are common to all stimuli in [GENERAL] section
