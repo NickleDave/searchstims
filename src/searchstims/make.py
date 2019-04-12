@@ -255,9 +255,19 @@ def make(config_obj):
                     ):
                         os.makedirs(os.path.join(this_section_output_dir, str(set_size), target))
 
-                    for i in inds_of_stim_to_make:
+                    all_cells_to_use, all_xx_to_use_ctr, all_yy_to_use_ctr = _generate_xx_and_yy(set_size=set_size,
+                                                                                                 num_imgs=len(img_nums),
+                                                                                                 stim_maker=stim_maker)
+
+                    for img_num, cells_to_use, xx_to_use_ctr, yy_to_use_ctr in zip(img_nums,
+                                                                                   all_cells_to_use,
+                                                                                   all_xx_to_use_ctr,
+                                                                                   all_yy_to_use_ctr):
                         rect_tuple = stim_maker.make_stim(set_size=set_size,
-                                                          num_target=num_target)
+                                                          num_target=num_target,
+                                                          cells_to_use=cells_to_use,
+                                                          xx_to_use_ctr=xx_to_use_ctr,
+                                                          yy_to_use_ctr=yy_to_use_ctr)
                         if section == 'rectangle':
                             filename = ('redvert_v_greenvert_set_size_{}_'
                                         'target_{}_{}.png'.format(set_size, target, img_num))
