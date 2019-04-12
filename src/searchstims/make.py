@@ -34,6 +34,93 @@ def _get_common_args_from_stim_or_general(stim_config, general_config):
     return tuple(common_args)
 
 
+def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
+    # get all combinations of cells (combination because order doesn't matter, just which cells get used)
+    cell_combs = list(combinations(iterable=range(stim_maker.num_cells), r=set_size))
+    if len(cell_combs) < num_imgs:
+        num_repeat = ceil(num_imgs / cell_combs)
+        all_cells_to_use = cell_combs * num_repeat
+        all_cells_to_use = cell_combs[:num_imgs]
+        make_jitter_unique = True
+    else:
+        # don't need to repeat any cell combinations; let's just sample without replacement
+        all_cells_to_use = random.sample(population=cell_combs, k=num_imgs)
+        num_repeat = 0
+        make_jitter_unique = False
+
+    # if jitter > 0, compute 'jitter_range'
+    # (vector of possible jitter amounts within maximum jitter from which to draw randomly)
+    if stim_maker.jitter > 0:
+        jitter_high = stim_maker.jitter // 2
+        jitter_low = -jitter_high
+        if stim_maker.jitter % 2 == 0:  # if even
+            # have to account for zero at center of jitter range
+            # (otherwise range would be jitter + 1)
+            # (Not a problem when doing floor division on odd #s)
+            coin_flip = np.random.choice([0, 1])
+            if coin_flip == 0:
+                jitter_low += 1
+            elif coin_flip == 1:
+                jitter_high -= 1
+        jitter_range = range(jitter_low, jitter_high + 1)
+        # get cartesian product of jitter range of length 2, i.e. all x-y co-ordinates
+        # here we want cartesian product because order does matter, jitter of (1,0) != (0, 1)
+        # and because we want repeats, e.g. (2, 2)
+        jitter_product = list(product(jitter_range, repeat=2))
+
+        if make_jitter_unique:
+            # get each unique pairing of possible cell combinations and possible x, y jitters
+            jitter_to_add = jitter_product
+            cell_and_jitter = list(product(all_cells_to_use, jitter_product))
+            if len(cell_and_jitter) < num_imgs:
+                raise ValueError('cannot generate unique x and y co-ordinates for items in number of images specified; '
+                                 f'the product of the number of cell combinations {len(all_cells_to_use)} and the '
+                                 f'possible jitter added {len(jitter_product)} is {len(cell_jitter_prod)}, but '
+                                 f'the number of images to generate is {num_imgs}')
+        else:
+            jitter_rand = random.choices(jitter_product, k=len(all_cells_to_use))
+            jitter_to_add = jitter_rand
+    else:
+        jitter_to_add = None
+
+    ###########################################################################
+    # notice: below we always refer to y before x, because shapes are         #
+    # specified in order of (height, width). So size[0] = y and size[1] = x   #
+    ###########################################################################
+    all_yy_to_use_ctr = []
+    all_xx_to_use_ctr = []
+    for cells_to_use in all_cells_to_use:
+        # need to cast to list and then array because converting a list with asarray returns a 1-dimensional
+        # array, and indexing with this one-dimensional array returns another 1-d array. Using just a tuple
+        # or an array made from a tuple will just return a single element when the tuple has only one element,
+        # and this will raise an error when that one element is passed to stim_maker instead of a 1-d, 1 element
+        # array
+        cells_to_use = np.asarray(list(cells_to_use))
+        yy_to_use = stim_maker.yy[cells_to_use]
+        xx_to_use = stim_maker.xx[cells_to_use]
+
+        # find centers of cells we're going to use
+        yy_to_use_ctr = (yy_to_use * stim_maker.cell_height) - stim_maker.cell_y_center
+        xx_to_use_ctr = (xx_to_use * stim_maker.cell_width) - stim_maker.cell_x_center
+
+        if stim_maker.border_size:
+            yy_to_use_ctr += round(stim_maker.border_size[0] / 2)
+            xx_to_use_ctr += round(stim_maker.border_size[1] / 2)
+
+        all_yy_to_use_ctr.append(yy_to_use_ctr)
+        all_xx_to_use_ctr.append(xx_to_use_ctr)
+
+    if jitter_to_add:
+        for yy, xx, jitter_tuple in zip(all_yy_to_use_ctr, all_xx_to_use_ctr, jitter_to_add):
+            yy += jitter_tuple[0]
+            xx += jitter_tuple[1]
+
+    # convert all to numpy arrays
+    # all_xx_to_use_ctr = [np.asarray(xx_to_use_ctr) for xx_to_use_ctr in all_xx_to_use_ctr]
+    # all_yy_to_use_ctr = [np.asarray(yy_to_use_ctr) for yy_to_use_ctr in all_yy_to_use_ctr]
+    return all_cells_to_use, all_xx_to_use_ctr, all_yy_to_use_ctr
+
+
 def make(config_obj):
     """actual function that makes all the stimuli
 
