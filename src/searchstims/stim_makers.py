@@ -31,6 +31,55 @@ MAX_DRAWS_OUTER = 100
 
 class AbstractStimMaker:
     """parent class for all StimMaker classes
+
+    Attributes
+    ----------
+    target_color : str
+        {'red', 'green', 'white', 'blue'}. Default is 'red'.
+    distractor_color : str
+        {'red', 'green', 'white', 'blue'}. Default is 'green'.
+    window_size : tuple
+        of length two, representing (height, width) of window in pixels.
+    border_size : tuple
+        of length two, representing (height, width) of border, distance
+        from edge of window within which items should not be displayed.
+        Default is None.
+    grid_size : tuple
+        of length two, representing the number of (rows, columns)
+        in the grid on which target and distractors will be located.
+    min_center_dist : int
+        Minimum distance between center point of items. Default is None, in
+        which case any distance is permitted. Only used if grid_size is None
+        and items are placed randomly instead of on a grid.
+    item_bbox_size : tuple
+        shape of "bounding box" that contains items to be plotted,
+        (height, width) in pixels. Default is (30, 30).
+    jitter : int
+        number of pixels to jitter each 'item' in the 'set'
+        that will be plotted on the grid. Default is 5.
+        Adding jitter is helpful for creating stimuli with the
+        same set size but slightly different placements, e.g. for
+        augmenting data to train a learning algorithm and encourage
+        invariant representations.
+    num_cells : int
+        rows * columns in grid
+    grid_size_pixels : tuple
+        (width, height). Size of grid in pixels. Either equal to window size, or if
+        border size is not None, equal to window size minus border size.
+    yy : numpy.ndarray
+       y-axis co-ordinates of cells, e.g. [0, 1, 2, 3, 4] for an y-axis with 5 cells.
+    xx : numpy.ndarray
+        x-axis co-ordinates of cells, e.g. [0, 1, 2, 3, 4] for an x-axis with 5 cells.
+    cell_height : int
+        height of a cell in grid, in pixels
+    cell_y_center : int
+        co-ordinate of center of y axis of a cell. Add to co-ordinate of cell corner to
+        get the center point of cell within the entire window.
+    cell_width : int
+        width of a cell in grid, in pixels
+    cell_x_center
+        co-ordinate of center of x axis of a cell. Add to co-ordinate of cell corner to
+        get the center point of cell within the entire window.
     """
 
     RectTuple = namedtuple('RectTuple', ['display_surface',
