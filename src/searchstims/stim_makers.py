@@ -240,9 +240,6 @@ class AbstractStimMaker:
             if len(cells_to_use) != set_size:
                 raise ValueError(f'Number of elements in cells_to_use must equal set_size.\n'
                                  f'cells_to_use has length {len(cells_to_use)} but set_size is {set_size}.')
-            if xx_to_use_ctr or yy_to_use_ctr:
-                raise ValueError('Cannot pass arguments for both cells_to_use and xx_to_use_ctr and '
-                                 'yy_to_use_ctr, unclear which should be used')
 
         if xx_to_use_ctr:
             if yy_to_use_ctr is None:
