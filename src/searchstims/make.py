@@ -226,6 +226,9 @@ def make(config_obj):
                                                          )
             this_section_output_dir = os.path.join(root_output_dir, section)
 
+            num_imgs_present = general_config.num_target_present // len(general_config.set_sizes)
+            num_imgs_absent = general_config.num_target_absent // len(general_config.set_sizes)
+
             for set_size in general_config.set_sizes:
                 # add dict for this set size that will have list of "target present / absent" filenames
                 out_dict[set_size] = {}
