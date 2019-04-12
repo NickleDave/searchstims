@@ -241,10 +241,9 @@ class AbstractStimMaker:
                 raise ValueError(f'Number of elements in cells_to_use must equal set_size.\n'
                                  f'cells_to_use has length {len(cells_to_use)} but set_size is {set_size}.')
 
-        if xx_to_use_ctr:
+        if xx_to_use_ctr is not None:
             if yy_to_use_ctr is None:
                 raise ValueError('must pass an argument for yy_to_use_ctr when passing xx_to_use_ctr')
-            xx_to_use_ctr = np.squeeze(xx_to_use_ctr)
             if xx_to_use_ctr.ndim != 1:
                 raise ValueError('xx_to_use_ctr should be a one-dimensional vector but has shape: '
                                  f'{xx_to_use_ctr.shape}')
@@ -252,10 +251,9 @@ class AbstractStimMaker:
                 raise ValueError('Number of elements in xx_to_use_ctr must equal set size.'
                                  f'xx_to_use_ctr.shape is {xx_to_use_ctr.shape} and set size is {set_size}')
 
-        if yy_to_use_ctr:
+        if yy_to_use_ctr is not None:
             if xx_to_use_ctr is None:
                 raise ValueError('must pass an argument for xx_to_use_ctr when passing yy_to_use_ctr')
-            yy_to_use_ctr = np.squeeze(yy_to_use_ctr)
             if yy_to_use_ctr.ndim != 1:
                 raise ValueError('yy_to_use_ctr should be a one-dimensional vector but has shape: '
                                  f'{yy_to_use_ctr.shape}')
