@@ -239,14 +239,15 @@ def make(config_obj):
                     os.makedirs(
                         os.path.join(this_section_output_dir, str(set_size))
                     )
+
                 for target in ('present', 'absent'):
                     # add the actual filename list for 'present' or 'absent'
                     out_dict[set_size][target] = []
                     if target == 'present':
-                        inds_of_stim_to_make = range(general_config.num_target_present // len(general_config.set_sizes))
+                        img_nums = list(range(num_imgs_present))
                         num_target = 1
                     elif target == 'absent':
-                        inds_of_stim_to_make = range(general_config.num_target_absent // len(general_config.set_sizes))
+                        img_nums = list(range(num_imgs_absent))
                         num_target = 0
 
                     if not os.path.isdir(
@@ -259,10 +260,10 @@ def make(config_obj):
                                                           num_target=num_target)
                         if section == 'rectangle':
                             filename = ('redvert_v_greenvert_set_size_{}_'
-                                        'target_{}_{}.png'.format(set_size, target, i))
+                                        'target_{}_{}.png'.format(set_size, target, img_num))
                         elif section == 'number':
                             filename = ('two_v_five_set_size_{}_'
-                                        'target_{}_{}.png'.format(set_size, target, i))
+                                        'target_{}_{}.png'.format(set_size, target, img_num))
                         # use absolute path to save
                         absolute_path_filename = os.path.join(this_section_output_dir,
                                                               str(set_size),
