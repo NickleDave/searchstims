@@ -200,6 +200,21 @@ class AbstractStimMaker:
             Default is 8.
         num_target : int
             Number of targets. Default is 1.
+        cells_to_use : list
+            list of cells in grid to use. Length must equal set_size.
+            Default is None, in which case cells are drawn randomly from
+            grid defined for this stim maker. The centers of the cells of
+            the grid are accessible as stim_maker.xx and stim_maker.yy
+        xx_to_use_ctr : numpy.ndarray
+            co-ordinates of center of item bounding boxes on x axis.
+            One-dimensional vector; number of elements must equal set_size.
+            Default is None. If None and cells_to_use is None, cells will
+            be drawn at random and the center of those cells used.
+        yy_to_use_ctr : numpy.ndarray
+            co-ordinates of center of item bounding boxes on y axis.
+            One-dimensional vector; number of elements must equal set_size.
+            Default is None. If None and cells_to_use is None, cells will
+            be drawn at random and the center of those cells used.
 
         Returns
         -------
