@@ -31,6 +31,55 @@ MAX_DRAWS_OUTER = 100
 
 class AbstractStimMaker:
     """parent class for all StimMaker classes
+
+    Attributes
+    ----------
+    target_color : str
+        {'red', 'green', 'white', 'blue'}. Default is 'red'.
+    distractor_color : str
+        {'red', 'green', 'white', 'blue'}. Default is 'green'.
+    window_size : tuple
+        of length two, representing (height, width) of window in pixels.
+    border_size : tuple
+        of length two, representing (height, width) of border, distance
+        from edge of window within which items should not be displayed.
+        Default is None.
+    grid_size : tuple
+        of length two, representing the number of (rows, columns)
+        in the grid on which target and distractors will be located.
+    min_center_dist : int
+        Minimum distance between center point of items. Default is None, in
+        which case any distance is permitted. Only used if grid_size is None
+        and items are placed randomly instead of on a grid.
+    item_bbox_size : tuple
+        shape of "bounding box" that contains items to be plotted,
+        (height, width) in pixels. Default is (30, 30).
+    jitter : int
+        number of pixels to jitter each 'item' in the 'set'
+        that will be plotted on the grid. Default is 5.
+        Adding jitter is helpful for creating stimuli with the
+        same set size but slightly different placements, e.g. for
+        augmenting data to train a learning algorithm and encourage
+        invariant representations.
+    num_cells : int
+        rows * columns in grid
+    grid_size_pixels : tuple
+        (width, height). Size of grid in pixels. Either equal to window size, or if
+        border size is not None, equal to window size minus border size.
+    yy : numpy.ndarray
+       y-axis co-ordinates of cells, e.g. [0, 1, 2, 3, 4] for an y-axis with 5 cells.
+    xx : numpy.ndarray
+        x-axis co-ordinates of cells, e.g. [0, 1, 2, 3, 4] for an x-axis with 5 cells.
+    cell_height : int
+        height of a cell in grid, in pixels
+    cell_y_center : int
+        co-ordinate of center of y axis of a cell. Add to co-ordinate of cell corner to
+        get the center point of cell within the entire window.
+    cell_width : int
+        width of a cell in grid, in pixels
+    cell_x_center
+        co-ordinate of center of x axis of a cell. Add to co-ordinate of cell corner to
+        get the center point of cell within the entire window.
     """
 
     RectTuple = namedtuple('RectTuple', ['display_surface',
@@ -95,6 +144,29 @@ class AbstractStimMaker:
         self.item_bbox_size = item_bbox_size
         self.jitter = jitter
 
+        if self.grid_size:
+            self.num_cells = self.grid_size[0] * self.grid_size[1]
+
+            if self.border_size is None:
+                self.grid_size_pixels = self.window_size
+            else:
+                self.grid_size_pixels = (self.window_size[0] - self.border_size[0],
+                                         self.window_size[1] - self.border_size[1])
+
+            # make grid, randomly select which cells in grid to use.
+            grid_y = np.arange(1, self.grid_size[0] + 1)
+            grid_x = np.arange(1, self.grid_size[1] + 1)
+            yy, xx = np.meshgrid(grid_y, grid_x)
+            self.yy = yy.ravel()
+            self.xx = xx.ravel()
+
+            # find centers of cells we're going to use
+            self.cell_height = round(self.grid_size_pixels[0] / self.grid_size[0])
+            self.cell_y_center = round((self.grid_size_pixels[0] / self.grid_size[0]) / 2)
+
+            self.cell_width = round(self.grid_size_pixels[1] / self.grid_size[1])
+            self.cell_x_center = round((self.grid_size_pixels[1] / self.grid_size[1]) / 2)
+
     def draw_item(self, display_surface, item_bbox, is_target):
         """draw item for visual search stimulus
 
@@ -115,6 +187,9 @@ class AbstractStimMaker:
     def make_stim(self,
                   set_size=8,
                   num_target=1,
+                  cells_to_use=None,
+                  xx_to_use_ctr=None,
+                  yy_to_use_ctr=None
                   ):
         """make visual search stimuli
 
@@ -125,6 +200,21 @@ class AbstractStimMaker:
             Default is 8.
         num_target : int
             Number of targets. Default is 1.
+        cells_to_use : list
+            list of cells in grid to use. Length must equal set_size.
+            Default is None, in which case cells are drawn randomly from
+            grid defined for this stim maker. The centers of the cells of
+            the grid are accessible as stim_maker.xx and stim_maker.yy
+        xx_to_use_ctr : numpy.ndarray
+            co-ordinates of center of item bounding boxes on x axis.
+            One-dimensional vector; number of elements must equal set_size.
+            Default is None. If None and cells_to_use is None, cells will
+            be drawn at random and the center of those cells used.
+        yy_to_use_ctr : numpy.ndarray
+            co-ordinates of center of item bounding boxes on y axis.
+            One-dimensional vector; number of elements must equal set_size.
+            Default is None. If None and cells_to_use is None, cells will
+            be drawn at random and the center of those cells used.
 
         Returns
         -------
@@ -146,6 +236,31 @@ class AbstractStimMaker:
         if num_target > set_size:
             raise ValueError('number of targets cannot be greater than set size')
 
+        if cells_to_use:
+            if len(cells_to_use) != set_size:
+                raise ValueError(f'Number of elements in cells_to_use must equal set_size.\n'
+                                 f'cells_to_use has length {len(cells_to_use)} but set_size is {set_size}.')
+
+        if xx_to_use_ctr is not None:
+            if yy_to_use_ctr is None:
+                raise ValueError('must pass an argument for yy_to_use_ctr when passing xx_to_use_ctr')
+            if xx_to_use_ctr.ndim != 1:
+                raise ValueError('xx_to_use_ctr should be a one-dimensional vector but has shape: '
+                                 f'{xx_to_use_ctr.shape}')
+            if xx_to_use_ctr.shape[0] != set_size:
+                raise ValueError('Number of elements in xx_to_use_ctr must equal set size.'
+                                 f'xx_to_use_ctr.shape is {xx_to_use_ctr.shape} and set size is {set_size}')
+
+        if yy_to_use_ctr is not None:
+            if xx_to_use_ctr is None:
+                raise ValueError('must pass an argument for xx_to_use_ctr when passing yy_to_use_ctr')
+            if yy_to_use_ctr.ndim != 1:
+                raise ValueError('yy_to_use_ctr should be a one-dimensional vector but has shape: '
+                                 f'{yy_to_use_ctr.shape}')
+            if yy_to_use_ctr.shape[0] != set_size:
+                raise ValueError('Number of elements in yy_to_use_ctr must equal set size.'
+                                 f'yy_to_use_ctr.shape is {yy_to_use_ctr.shape} and set size is {set_size}')
+
         if self.grid_size is not None:
             total_grid_elements = self.grid_size[0] * self.grid_size[1]
             if set_size > total_grid_elements:
@@ -160,123 +275,108 @@ class AbstractStimMaker:
         # notice: below we always refer to y before x, because shapes are         #
         # specified in order of (height, width). So size[0] = y and size[1] = x   #
         ###########################################################################
-        if self.grid_size:
-            if self.border_size is None:
-                grid_size_pixels = self.window_size
-            else:
-                grid_size_pixels = (self.window_size[0] - self.border_size[0],
-                                    self.window_size[1] - self.border_size[1])
+        if cells_to_use is not None or (xx_to_use_ctr is None and yy_to_use_ctr is None):
+            if self.grid_size:
+                if cells_to_use is None:
+                    cells_to_use = sorted(np.random.choice(np.arange(self.num_cells),
+                                                           size=set_size,
+                                                           replace=False))
 
-            # make grid, randomly select which cells in grid to use.
-            grid_y = np.arange(1, self.grid_size[0] + 1)
-            grid_x = np.arange(1, self.grid_size[1] + 1)
-            yy, xx = np.meshgrid(grid_y, grid_x)
-            yy = yy.ravel()
-            xx = xx.ravel()
-            num_cells = self.grid_size[0] * self.grid_size[1]
-            cells_to_use = sorted(np.random.choice(np.arange(num_cells),
-                                                   size=set_size,
-                                                   replace=False))
+                    yy_to_use = self.yy[cells_to_use]
+                    xx_to_use = self.xx[cells_to_use]
 
-            yy_to_use = yy[cells_to_use]
-            xx_to_use = xx[cells_to_use]
+                    # find centers of cells we're going to use
+                    yy_to_use_ctr = (yy_to_use * self.cell_height) - self.cell_y_center
 
-            # find centers of cells we're going to use
-            cell_height = round(grid_size_pixels[0] / self.grid_size[0])
-            cell_y_center = round((grid_size_pixels[0] / self.grid_size[0]) / 2)
-            yy_to_use_ctr = (yy_to_use * cell_height) - cell_y_center
+                    xx_to_use_ctr = (xx_to_use * self.cell_width) - self.cell_x_center
 
-            cell_width = round(grid_size_pixels[1] / self.grid_size[1])
-            cell_x_center = round((grid_size_pixels[1] / self.grid_size[1]) / 2)
-            xx_to_use_ctr = (xx_to_use * cell_width) - cell_x_center
+                    if self.border_size:
+                        yy_to_use_ctr += round(self.border_size[0] / 2)
+                        xx_to_use_ctr += round(self.border_size[1] / 2)
 
-            if self.border_size:
-                yy_to_use_ctr += round(self.border_size[0] / 2)
-                xx_to_use_ctr += round(self.border_size[1] / 2)
+                    # add jitter to those points
+                    jitter_high = self.jitter // 2
+                    jitter_low = -jitter_high
+                    if self.jitter % 2 == 0:  # if even
+                        # have to account for zero at center of jitter range
+                        # (otherwise range would be jitter + 1)
+                        # (Not a problem when doing floor division on odd #s)
+                        coin_flip = np.random.choice([0, 1])
+                        if coin_flip == 0:
+                            jitter_low += 1
+                        elif coin_flip == 1:
+                            jitter_high -= 1
+                    jitter_range = np.arange(jitter_low, jitter_high + 1)
 
-            # add jitter to those points
-            jitter_high = self.jitter // 2
-            jitter_low = -jitter_high
-            if self.jitter % 2 == 0:  # if even
-                # have to account for zero at center of jitter range
-                # (otherwise range would be jitter + 1)
-                # (Not a problem when doing floor division on odd #s)
-                coin_flip = np.random.choice([0, 1])
-                if coin_flip == 0:
-                    jitter_low += 1
-                elif coin_flip == 1:
-                    jitter_high -= 1
-            jitter_range = np.arange(jitter_low, jitter_high + 1)
+                    y_jitter = np.random.choice(jitter_range, size=yy_to_use.size)
+                    yy_to_use_ctr += y_jitter
+                    x_jitter = np.random.choice(jitter_range, size=xx_to_use.size)
+                    xx_to_use_ctr += x_jitter
 
-            y_jitter = np.random.choice(jitter_range, size=yy_to_use.size)
-            yy_to_use_ctr += y_jitter
-            x_jitter = np.random.choice(jitter_range, size=xx_to_use.size)
-            xx_to_use_ctr += x_jitter
+            else:  # if self.grid_size is None
+                if self.border_size:
+                    yy = np.arange(self.border_size[0] + (self.item_bbox_size[0] / 2),
+                                   self.window_size[0] - (self.border_size[0] + (self.item_bbox_size[0] / 2) + 1),
+                                   dtype=int)
+                    xx = np.arange(self.border_size[1] + (self.item_bbox_size[1] / 2),
+                                   self.window_size[1] - (self.border_size[1] + (self.item_bbox_size[1] / 2) + 1),
+                                   dtype=int)
+                else:
+                    yy = np.arange(self.item_bbox_size[0] / 2,
+                                   self.window_size[0] - (self.item_bbox_size[0] / 2))
+                    xx = np.arange(self.item_bbox_size[1] / 2,
+                                   self.window_size[1] - (self.item_bbox_size[1] / 2))
 
-        else:  # if self.grid_size is None
-            if self.border_size:
-                yy = np.arange(self.border_size[0] + (self.item_bbox_size[0] / 2),
-                               self.window_size[0] - (self.border_size[0] + (self.item_bbox_size[0] / 2) + 1),
-                               dtype=int)
-                xx = np.arange(self.border_size[1] + (self.item_bbox_size[1] / 2),
-                               self.window_size[1] - (self.border_size[1] + (self.item_bbox_size[1] / 2) + 1),
-                               dtype=int)
-            else:
-                yy = np.arange(self.item_bbox_size[0] / 2,
-                               self.window_size[0] - (self.item_bbox_size[0] / 2))
-                xx = np.arange(self.item_bbox_size[1] / 2,
-                               self.window_size[1] - (self.item_bbox_size[1] / 2))
+                # draw center points at random
+                dists_are_good = False
+                less_than_set_size = True
+                draws_outer = 0
+                while dists_are_good is False:
+                    draws_outer += 1
+                    if draws_outer > MAX_DRAWS_OUTER:
+                        raise ValueError('could not find suitable set of co-ordinates for set')
 
-            # draw center points at random
-            dists_are_good = False
-            less_than_set_size = True
-            draws_outer = 0
-            while dists_are_good is False:
-                draws_outer += 1
-                if draws_outer > MAX_DRAWS_OUTER:
-                    raise ValueError('could not find suitable set of co-ordinates for set')
+                    draws_inner = 0
+                    coords_list = []
 
-                draws_inner = 0
-                coords_list = []
+                    while less_than_set_size is True:
+                        yy_to_use_ctr = np.random.choice(yy)
+                        xx_to_use_ctr = np.random.choice(xx)
+                        coord = [xx_to_use_ctr, yy_to_use_ctr]
+                        draws_inner += 1
+                        if draws_inner > MAX_DRAWS_INNER:
+                            coords_list = []
+                            draws_inner = 0
 
-                while less_than_set_size is True:
-                    yy_to_use_ctr = np.random.choice(yy)
-                    xx_to_use_ctr = np.random.choice(xx)
-                    coord = [xx_to_use_ctr, yy_to_use_ctr]
-                    draws_inner += 1
-                    if draws_inner > MAX_DRAWS_INNER:
-                        coords_list = []
-                        draws_inner = 0
+                        if len(coords_list) == 0:
+                            coords_list.append(coord)
 
-                    if len(coords_list) == 0:
-                        coords_list.append(coord)
-
-                        if set_size == 1:
-                            # then we're done actually
-                            less_than_set_size = False
-                            dists_are_good = True
-                            # make into an array of size (1,) to prevent crash when we index into them below
-                            yy_to_use_ctr = np.asarray([yy_to_use_ctr])
-                            xx_to_use_ctr = np.asarray([xx_to_use_ctr])
-                    else:
-                        coords_list_tmp = list(coords_list)
-                        coords_list_tmp.append(coord)
-                        coords_list_tmp = np.stack(coords_list_tmp)
-                        dists = pdist(coords_list_tmp)
-
-                        if np.any(dists < self.min_center_dist):
-                            continue
+                            if set_size == 1:
+                                # then we're done actually
+                                less_than_set_size = False
+                                dists_are_good = True
+                                # make into an array of size (1,) to prevent crash when we index into them below
+                                yy_to_use_ctr = np.asarray([yy_to_use_ctr])
+                                xx_to_use_ctr = np.asarray([xx_to_use_ctr])
                         else:
-                            coords_list = coords_list_tmp.tolist()
+                            coords_list_tmp = list(coords_list)
+                            coords_list_tmp.append(coord)
+                            coords_list_tmp = np.stack(coords_list_tmp)
+                            dists = pdist(coords_list_tmp)
 
-                            if len(coords_list) < set_size:
+                            if np.any(dists < self.min_center_dist):
                                 continue
                             else:
-                                coords = np.asarray(coords_list)
-                                yy_to_use_ctr = coords[:, 1]
-                                xx_to_use_ctr = coords[:, 0]
-                                dists_are_good = True
-                                less_than_set_size = False
+                                coords_list = coords_list_tmp.tolist()
+
+                                if len(coords_list) < set_size:
+                                    continue
+                                else:
+                                    coords = np.asarray(coords_list)
+                                    yy_to_use_ctr = coords[:, 1]
+                                    xx_to_use_ctr = coords[:, 0]
+                                    dists_are_good = True
+                                    less_than_set_size = False
 
         # set up window
         display_surface = pygame.display.set_mode((self.window_size[1], self.window_size[0]),
@@ -290,7 +390,7 @@ class AbstractStimMaker:
         target_indices = []
         distractor_indices = []
         if self.grid_size:
-            grid_as_char = [''] * num_cells
+            grid_as_char = [''] * self.num_cells
         else:
             grid_as_char = None
 

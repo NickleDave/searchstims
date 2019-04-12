@@ -5,6 +5,11 @@ import os
 import tempfile
 import shutil
 import unittest
+from glob import glob
+import json
+
+import imageio
+import numpy as np
 
 from searchstims.config import parse
 from searchstims.make import make
@@ -82,6 +87,39 @@ class TestMake(unittest.TestCase):
         self.assertTrue(self._files_got_made(config_obj, 'rectangle'))
         self.assertTrue(self._dirs_got_made(config_obj, 'number'))
         self.assertTrue(self._files_got_made(config_obj, 'number'))
+
+    def test_when_general_config_has_common_stim_options(self):
+        config_file = os.path.join(self.test_configs, 'test_config_general_has_common_stim_options.ini')
+        config_obj = parse(config_file)
+        config_obj.general.output_dir = self.tmp_output_dir
+        make(config_obj)
+        self.assertTrue(self._dirs_got_made(config_obj, 'rectangle'))
+        self.assertTrue(self._files_got_made(config_obj, 'rectangle'))
+        self.assertTrue(self._dirs_got_made(config_obj, 'number'))
+        self.assertTrue(self._files_got_made(config_obj, 'number'))
+
+    def test_enforce_unique(self):
+        config_file = os.path.join(self.test_configs, 'test_config_enforce_unique.ini')
+        config_obj = parse(config_file)
+        config_obj.general.output_dir = self.tmp_output_dir
+        make(config_obj)
+        self.assertTrue(self._dirs_got_made(config_obj, 'rectangle'))
+        self.assertTrue(self._files_got_made(config_obj, 'rectangle'))
+        fnames_json = glob(os.path.join(self.tmp_output_dir, '*.json'))
+        self.assertTrue(len(fnames_json) == 1)
+        fnames_json = fnames_json[0]
+        with open(fnames_json, 'r') as fp:
+            fnames_dict = json.load(fp)
+        fnames = [targ_dict['filename']
+                  for set_size, set_size_dict in fnames_dict.items()
+                  for targ, targ_list in set_size_dict.items()
+                  for targ_dict in targ_list
+                  ]
+        imgs = [imageio.imread(os.path.join(self.tmp_output_dir, fname)) for fname in fnames]
+        imgs = np.asarray(imgs)
+        print("calculating unique images, this might take a minute.")
+        uniq_imgs = np.unique(imgs, axis=0)
+        self.assertTrue(imgs.shape == uniq_imgs.shape)  # i.e. assert all images are unique
 
 
 if __name__ == '__main__':

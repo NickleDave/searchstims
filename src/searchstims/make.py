@@ -1,5 +1,10 @@
 import os
 import json
+from math import ceil
+import random
+from itertools import combinations, product
+
+import numpy as np
 import pygame
 
 from . import stim_makers
@@ -18,6 +23,7 @@ COMMON_ARGS = [
         'jitter',
 ]
 
+
 def _get_common_args_from_stim_or_general(stim_config, general_config):
     common_args = []
     for this_attr in COMMON_ARGS:
@@ -26,6 +32,108 @@ def _get_common_args_from_stim_or_general(stim_config, general_config):
             this_arg = getattr(general_config, this_attr)
         common_args.append(this_arg)
     return tuple(common_args)
+
+
+def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
+    # get all combinations of cells (combination because order doesn't matter, just which cells get used)
+    # a cell combination is an unordered set of k cells from a grid with a total of n cells
+    # e.g. if there are 25 cells in a 5x5 grid and you want all combinations k=1, then the
+    # cell_combs will be [(0,), (1,), (2,), ... (24,)] (representing each as a tuple)
+    # and all combinations k=2 will be [(0,1), (0,2), (0,3), ... (1,2), (1,3), ... (23, 24)]
+    # (there are no repeats; once we draw a cell we don't replace it since we just put one item in each cell)
+    cell_combs = list(combinations(iterable=range(stim_maker.num_cells), r=set_size))
+    if len(cell_combs) < num_imgs:
+        num_repeat = ceil(num_imgs / len(cell_combs))
+        make_jitter_unique = True
+    else:
+        # don't need to repeat any cell combinations; let's just sample without replacement
+        all_cells_to_use = random.sample(population=cell_combs, k=num_imgs)
+        num_repeat = 0
+        make_jitter_unique = False
+
+    # if jitter > 0, compute 'jitter_range'
+    # (vector of possible jitter amounts within maximum jitter from which to draw randomly)
+    if stim_maker.jitter > 0:
+        jitter_high = stim_maker.jitter // 2
+        jitter_low = -jitter_high
+        if stim_maker.jitter % 2 == 0:  # if even
+            # have to account for zero at center of jitter range
+            # (otherwise range would be jitter + 1)
+            # (Not a problem when doing floor division on odd #s)
+            coin_flip = np.random.choice([0, 1])
+            if coin_flip == 0:
+                jitter_low += 1
+            elif coin_flip == 1:
+                jitter_high -= 1
+        jitter_range = range(jitter_low, jitter_high + 1)
+        # get cartesian product of jitter range of length 2, i.e. all x-y co-ordinates
+        # here we want cartesian product because order does matter, jitter of (1,0) != (0, 1)
+        # and because we want repeats, e.g. (2, 2)
+        jitter_product = list(product(jitter_range, repeat=2))
+
+        if make_jitter_unique:
+            # get each unique pairing of possible cell combinations and possible x, y jitters
+            cell_jitter_prod = list(product(cell_combs, jitter_product))
+            if len(cell_jitter_prod) < num_imgs:
+                raise ValueError('cannot generate unique x and y co-ordinates for items in number of images specified; '
+                                 f'the product of the number of cell combinations {len(all_cells_to_use)} and the '
+                                 f'possible jitter added {len(jitter_product)} is {len(cell_jitter_prod)}, but '
+                                 f'the number of images to generate is {num_imgs}')
+            else:
+                cell_and_jitter = []
+                for this_cell_comb in cell_combs:
+                    this_cell_comb_with_all_jitter = [cell_jitter_tuple
+                                                      for cell_jitter_tuple in cell_jitter_prod
+                                                      if cell_jitter_tuple[0] == this_cell_comb]
+                    this_cell_comb_with_jitter = random.sample(population=this_cell_comb_with_all_jitter,
+                                                               k=num_repeat)
+                    cell_and_jitter.extend(this_cell_comb_with_jitter)
+                diff = len(cell_and_jitter) - num_imgs
+                # remove extras randomly instead of removing all from the last cell_comb
+                inds_to_remove = random.sample(range(len(cell_and_jitter)), k=diff)
+                inds_to_remove.sort(reverse=True)
+                for ind in inds_to_remove:
+                    cell_and_jitter.pop(ind)
+                all_cells_to_use = [cj_tup[0] for cj_tup in cell_and_jitter]
+        else:
+            jitter_rand = random.choices(jitter_product, k=len(all_cells_to_use))
+            cell_and_jitter = zip(all_cells_to_use, jitter_rand)
+    else:
+        jitter_none = [None] * len(all_cells_to_use)
+        cell_and_jitter = zip(all_cells_to_use, jitter_none)
+
+    ###########################################################################
+    # notice: below we always refer to y before x, because shapes are         #
+    # specified in order of (height, width). So size[0] = y and size[1] = x   #
+    ###########################################################################
+    all_yy_to_use_ctr = []
+    all_xx_to_use_ctr = []
+    for cells_to_use, jitter_to_add in cell_and_jitter:
+        # need to cast to list and then array because converting a list with asarray returns a 1-dimensional
+        # array, and indexing with this one-dimensional array returns another 1-d array. Using just a tuple
+        # or an array made from a tuple will just return a single element when the tuple has only one element,
+        # and this will raise an error when that one element is passed to stim_maker instead of a 1-d, 1 element
+        # array
+        cells_to_use = np.asarray(list(cells_to_use))
+        yy_to_use = stim_maker.yy[cells_to_use]
+        xx_to_use = stim_maker.xx[cells_to_use]
+
+        # find centers of cells we're going to use
+        yy_to_use_ctr = (yy_to_use * stim_maker.cell_height) - stim_maker.cell_y_center
+        xx_to_use_ctr = (xx_to_use * stim_maker.cell_width) - stim_maker.cell_x_center
+
+        if stim_maker.border_size:
+            yy_to_use_ctr += round(stim_maker.border_size[0] / 2)
+            xx_to_use_ctr += round(stim_maker.border_size[1] / 2)
+
+        if jitter_to_add:
+            yy_to_use_ctr += jitter_to_add[0]
+            xx_to_use_ctr += jitter_to_add[1]
+
+        all_yy_to_use_ctr.append(yy_to_use_ctr)
+        all_xx_to_use_ctr.append(xx_to_use_ctr)
+
+    return all_cells_to_use, all_xx_to_use_ctr, all_yy_to_use_ctr
 
 
 def make(config_obj):
@@ -133,6 +241,9 @@ def make(config_obj):
                                                          )
             this_section_output_dir = os.path.join(root_output_dir, section)
 
+            num_imgs_present = general_config.num_target_present // len(general_config.set_sizes)
+            num_imgs_absent = general_config.num_target_absent // len(general_config.set_sizes)
+
             for set_size in general_config.set_sizes:
                 # add dict for this set size that will have list of "target present / absent" filenames
                 out_dict[set_size] = {}
@@ -143,14 +254,15 @@ def make(config_obj):
                     os.makedirs(
                         os.path.join(this_section_output_dir, str(set_size))
                     )
+
                 for target in ('present', 'absent'):
                     # add the actual filename list for 'present' or 'absent'
                     out_dict[set_size][target] = []
                     if target == 'present':
-                        inds_of_stim_to_make = range(general_config.num_target_present // len(general_config.set_sizes))
+                        img_nums = list(range(num_imgs_present))
                         num_target = 1
                     elif target == 'absent':
-                        inds_of_stim_to_make = range(general_config.num_target_absent // len(general_config.set_sizes))
+                        img_nums = list(range(num_imgs_absent))
                         num_target = 0
 
                     if not os.path.isdir(
@@ -158,15 +270,25 @@ def make(config_obj):
                     ):
                         os.makedirs(os.path.join(this_section_output_dir, str(set_size), target))
 
-                    for i in inds_of_stim_to_make:
+                    all_cells_to_use, all_xx_to_use_ctr, all_yy_to_use_ctr = _generate_xx_and_yy(set_size=set_size,
+                                                                                                 num_imgs=len(img_nums),
+                                                                                                 stim_maker=stim_maker)
+
+                    for img_num, cells_to_use, xx_to_use_ctr, yy_to_use_ctr in zip(img_nums,
+                                                                                   all_cells_to_use,
+                                                                                   all_xx_to_use_ctr,
+                                                                                   all_yy_to_use_ctr):
                         rect_tuple = stim_maker.make_stim(set_size=set_size,
-                                                          num_target=num_target)
+                                                          num_target=num_target,
+                                                          cells_to_use=cells_to_use,
+                                                          xx_to_use_ctr=xx_to_use_ctr,
+                                                          yy_to_use_ctr=yy_to_use_ctr)
                         if section == 'rectangle':
                             filename = ('redvert_v_greenvert_set_size_{}_'
-                                        'target_{}_{}.png'.format(set_size, target, i))
+                                        'target_{}_{}.png'.format(set_size, target, img_num))
                         elif section == 'number':
                             filename = ('two_v_five_set_size_{}_'
-                                        'target_{}_{}.png'.format(set_size, target, i))
+                                        'target_{}_{}.png'.format(set_size, target, img_num))
                         # use absolute path to save
                         absolute_path_filename = os.path.join(this_section_output_dir,
                                                               str(set_size),
