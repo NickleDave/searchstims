@@ -241,12 +241,14 @@ def make(config_obj):
                                                          )
             this_section_output_dir = os.path.join(root_output_dir, section)
 
+            out_dict[section] = {}
+
             num_imgs_present = general_config.num_target_present // len(general_config.set_sizes)
             num_imgs_absent = general_config.num_target_absent // len(general_config.set_sizes)
 
             for set_size in general_config.set_sizes:
                 # add dict for this set size that will have list of "target present / absent" filenames
-                out_dict[set_size] = {}
+                out_dict[section][set_size] = {}
 
                 if not os.path.isdir(
                     os.path.join(this_section_output_dir, str(set_size))
@@ -257,7 +259,7 @@ def make(config_obj):
 
                 for target in ('present', 'absent'):
                     # add the actual filename list for 'present' or 'absent'
-                    out_dict[set_size][target] = []
+                    out_dict[section][set_size][target] = []
                     if target == 'present':
                         img_nums = list(range(num_imgs_present))
                         num_target = 1
@@ -305,7 +307,7 @@ def make(config_obj):
                             'target_indices': rect_tuple.target_indices,
                             'distractor_indices': rect_tuple.distractor_indices,
                         }
-                        out_dict[set_size][target].append(stim_info)
+                        out_dict[section][set_size][target].append(stim_info)
 
     out_json = json.dumps(out_dict, indent=4)
     json_filename = os.path.expanduser(general_config.json_filename)
