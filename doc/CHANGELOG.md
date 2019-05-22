@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.1.1] 2019-05-22
+### Fixed
 - fix how metadata is saved now that all sections in a single config.ini file are made
   + `searchstims.make` function adds a key for each section to the `dict` it uses to 
   track stimuli, so the `.json` file created from that `dict` has metadata for each section
@@ -33,7 +34,6 @@ of config.ini file
 - user specifies sizes in order of (height, width)
   + since people feeding images to neural networks are used to this order
   + even though PyGame expects (width, height)
-
 
 ## [0.3.0a1] 2019-03-29
 ### Added
