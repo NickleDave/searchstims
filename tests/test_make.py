@@ -111,7 +111,8 @@ class TestMake(unittest.TestCase):
         with open(fnames_json, 'r') as fp:
             fnames_dict = json.load(fp)
         fnames = [targ_dict['filename']
-                  for set_size, set_size_dict in fnames_dict.items()
+                  for stim_type, stim_dict in fnames_dict.items()
+                  for set_size, set_size_dict in stim_dict.items()
                   for targ, targ_list in set_size_dict.items()
                   for targ_dict in targ_list
                   ]
