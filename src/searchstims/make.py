@@ -7,31 +7,7 @@ from itertools import combinations, product
 import numpy as np
 import pygame
 
-from . import stim_makers
-
-VALID_STIM_SECTIONS = [
-    'rectangle',
-    'number'
-]
-
-COMMON_ARGS = [
-        'image_size',
-        'border_size',
-        'grid_size',
-        'min_center_dist',
-        'item_bbox_size',
-        'jitter',
-]
-
-
-def _get_common_args_from_stim_or_general(stim_config, general_config):
-    common_args = []
-    for this_attr in COMMON_ARGS:
-        this_arg = getattr(stim_config, this_attr)
-        if this_arg is None:
-            this_arg = getattr(general_config, this_attr)
-        common_args.append(this_arg)
-    return tuple(common_args)
+from .stim_makers import AbstractStimMaker
 
 
 def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
@@ -136,14 +112,16 @@ def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
     return all_cells_to_use, all_xx_to_use_ctr, all_yy_to_use_ctr
 
 
-def make(config_obj):
-    """actual function that makes all the stimuli
+def make(root_output_dir,
+         stim_dict,
+         json_filename,
+         num_target_present,
+         num_target_absent,
+         set_sizes):
+    """make visual search stimuli given an output directory and a set of StimMaker classes
 
     Parameters
     ----------
-    config_obj : searchstims.config.classes.Config
-        instance of Config returned by parse_config
-        after parsing a config.ini file
 
     Returns
     -------
@@ -196,8 +174,16 @@ def make(config_obj):
             'grid_as_char': [['', 'd', '', '', ''],
             ...
     """
-    general_config = config_obj.general
-    root_output_dir = general_config.output_dir
+    for stim_name, stim_maker in stim_dict.items():
+        if type(stim_name) != str:
+            raise TypeError(
+                f'all keys in stim_dict must be strings but found key of type {type(stim_name)}'
+            )
+        if not issubclass(type(stim_maker), AbstractStimMaker):
+            raise TypeError(
+                f'stim_maker not recognized as a subclass of AbstractStimMaker, type was {stim_maker}'
+            )
+
     if not os.path.isdir(root_output_dir):
         os.makedirs(root_output_dir)
 
@@ -207,59 +193,31 @@ def make(config_obj):
     # and can just get all the filenames for a given set size with target present or absent
     # by using appropriate keys
     # e.g. fnames_set_size_8_target_present = [stim_info['filename'] for stim_info in out_dict[8]['present']]
-    out_dict = {}
+    metadata = {}
 
-    for section in VALID_STIM_SECTIONS:
-        if getattr(config_obj, section) is not None:
-            if section == 'rectangle':
-                stim_config = config_obj.rectangle
-                (image_size, border_size, grid_size, min_center_dist,
-                 item_bbox_size, jitter) = _get_common_args_from_stim_or_general(stim_config, general_config)
-                stim_maker = stim_makers.RectangleStimMaker(target_color=stim_config.target_color,
-                                                            distractor_color=stim_config.distractor_color,
-                                                            window_size=image_size,
-                                                            border_size=border_size,
-                                                            grid_size=grid_size,
-                                                            min_center_dist=min_center_dist,
-                                                            item_bbox_size=item_bbox_size,
-                                                            jitter=jitter
-                                                            )
-            elif section == 'number':
-                stim_config = config_obj.number
-                (image_size, border_size, grid_size, min_center_dist,
-                 item_bbox_size, jitter) = _get_common_args_from_stim_or_general(stim_config, general_config)
-                stim_maker = stim_makers.NumberStimMaker(target_color=stim_config.target_color,
-                                                         distractor_color=stim_config.distractor_color,
-                                                         window_size=image_size,
-                                                         border_size=border_size,
-                                                         grid_size=grid_size,
-                                                         min_center_dist=min_center_dist,
-                                                         item_bbox_size=item_bbox_size,
-                                                         jitter=jitter,
-                                                         target_number=stim_config.target_number,
-                                                         distractor_number=stim_config.distractor_number
-                                                         )
-            this_section_output_dir = os.path.join(root_output_dir, section)
+    for stim_name, stim_maker in stim_dict.items():
 
-            out_dict[section] = {}
+            this_stim_name_output_dir = os.path.join(root_output_dir, stim_name)
 
-            num_imgs_present = general_config.num_target_present // len(general_config.set_sizes)
-            num_imgs_absent = general_config.num_target_absent // len(general_config.set_sizes)
+            metadata[stim_name] = {}
 
-            for set_size in general_config.set_sizes:
+            num_imgs_present = num_target_present // len(set_sizes)
+            num_imgs_absent = num_target_absent // len(set_sizes)
+
+            for set_size in set_sizes:
                 # add dict for this set size that will have list of "target present / absent" filenames
-                out_dict[section][set_size] = {}
+                metadata[stim_name][set_size] = {}
 
                 if not os.path.isdir(
-                    os.path.join(this_section_output_dir, str(set_size))
+                    os.path.join(this_stim_name_output_dir, str(set_size))
                 ):
                     os.makedirs(
-                        os.path.join(this_section_output_dir, str(set_size))
+                        os.path.join(this_stim_name_output_dir, str(set_size))
                     )
 
                 for target in ('present', 'absent'):
                     # add the actual filename list for 'present' or 'absent'
-                    out_dict[section][set_size][target] = []
+                    metadata[stim_name][set_size][target] = []
                     if target == 'present':
                         img_nums = list(range(num_imgs_present))
                         num_target = 1
@@ -268,9 +226,9 @@ def make(config_obj):
                         num_target = 0
 
                     if not os.path.isdir(
-                            os.path.join(this_section_output_dir, str(set_size), target)
+                            os.path.join(this_stim_name_output_dir, str(set_size), target)
                     ):
-                        os.makedirs(os.path.join(this_section_output_dir, str(set_size), target))
+                        os.makedirs(os.path.join(this_stim_name_output_dir, str(set_size), target))
 
                     all_cells_to_use, all_xx_to_use_ctr, all_yy_to_use_ctr = _generate_xx_and_yy(set_size=set_size,
                                                                                                  num_imgs=len(img_nums),
@@ -285,14 +243,13 @@ def make(config_obj):
                                                           cells_to_use=cells_to_use,
                                                           xx_to_use_ctr=xx_to_use_ctr,
                                                           yy_to_use_ctr=yy_to_use_ctr)
-                        if section == 'rectangle':
-                            filename = ('redvert_v_greenvert_set_size_{}_'
-                                        'target_{}_{}.png'.format(set_size, target, img_num))
-                        elif section == 'number':
-                            filename = ('two_v_five_set_size_{}_'
-                                        'target_{}_{}.png'.format(set_size, target, img_num))
+
+                        filename = (
+                            f'{stim_name}_set_size_{set_size}_target_{target}_{img_num}.png'
+                        )
+
                         # use absolute path to save
-                        absolute_path_filename = os.path.join(this_section_output_dir,
+                        absolute_path_filename = os.path.join(this_stim_name_output_dir,
                                                               str(set_size),
                                                               target,
                                                               filename)
@@ -300,19 +257,19 @@ def make(config_obj):
                         # use relative path for name of file in .json
                         # so it won't break anything if we move the whole directory of images around;
                         # --> it's the job of code the images to know where directory is at
-                        relative_path_filename = os.path.join(section, str(set_size), target, filename)
+                        relative_path_filename = os.path.join(stim_name, str(set_size), target, filename)
                         stim_info = {
                             'filename': relative_path_filename,
                             'grid_as_char': rect_tuple.grid_as_char,
                             'target_indices': rect_tuple.target_indices,
                             'distractor_indices': rect_tuple.distractor_indices,
                         }
-                        out_dict[section][set_size][target].append(stim_info)
+                        metadata[stim_name][set_size][target].append(stim_info)
 
-    out_json = json.dumps(out_dict, indent=4)
-    json_filename = os.path.expanduser(general_config.json_filename)
+    metadata_json = json.dumps(metadata, indent=4)
+    json_filename = os.path.expanduser(json_filename)
     if os.path.split(json_filename)[0] == '':
         json_filename = os.path.join(root_output_dir, json_filename)
 
     with open(json_filename, 'w') as json_fp:
-        print(out_json, file=json_fp)
+        print(metadata_json, file=json_fp)
