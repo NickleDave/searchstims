@@ -451,9 +451,9 @@ class AbstractStimMaker:
                               distractor_indices=distractor_indices)
 
 
-class RectangleStimMaker(AbstractStimMaker):
+class RVvGVStimMaker(AbstractStimMaker):
     """Make visual search stimuli with vertical rectangles
-    where target is different color form distractor."""
+    where target is red and distractors are green."""
     def draw_item(self, display_surface, item_bbox, is_target):
         """Draws a vertical rectangle that is 1/3 the width of the item bounding box.
 
@@ -489,9 +489,9 @@ class RectangleStimMaker(AbstractStimMaker):
         pygame.draw.rect(display_surface, color, rect_to_draw)
 
 
-class NumberStimMaker(AbstractStimMaker):
-    """Make visual search stimuli with digital 2s and 5s.
-    Considered a stimulus that results in 'inefficient' search."""
+class Two_v_Five_StimMaker(AbstractStimMaker):
+    """Make visual search stimuli where the target is a digital 2
+    and the distractors are digital 5s."""
     png_path = os.path.join(os.path.dirname(__file__), 'png')
 
     numbers_dict = {
