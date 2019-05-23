@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] 2019-05-22
+### Changed
+- refactor `searchstims.make` so it is more general
+  + now accepts a `stim_dict` that maps visual search stimulus names to instances of `StimMaker` classes
+  + in this way the function can be used with a script that passes user-defined `StimMaker` sub-classes
+    - instead of being limited to the two types of stimuli that can be specified in the `config.ini` files
+      + the alternative would've been to keep adding new possible sections the `config.ini` but this would've
+        been gross and painful
+
 ## [1.1.1] 2019-05-22
 ### Fixed
 - fix how metadata is saved now that all sections in a single config.ini file are made
