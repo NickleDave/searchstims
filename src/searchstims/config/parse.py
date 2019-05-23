@@ -3,12 +3,19 @@ import configparser
 from distutils.util import strtobool
 import ast
 
-from .classes import Config, GeneralConfig, RectangleConfig, NumberConfig
+from .classes import Config, GeneralConfig, RVvGVConfig, Two_v_Five_Config
+
+SECTION_CONFIG_ATTRIB_MAP = {
+    'general': 'general',
+    'RVvGV': 'RVvGV',
+    '2_v_5': 'Two_v_Five',
+}
+
 
 SECTION_CLASS_MAP = {
     'general': GeneralConfig,
-    'rectangle': RectangleConfig,
-    'number': NumberConfig,
+    'RVvGV': RVvGVConfig,
+    '2_v_5': Two_v_Five_Config,
 }
 
 
@@ -101,8 +108,9 @@ def parse(config_file=None):
     config_classes_dict = {}
     for section in typed_config_dict.keys():
         if typed_config_dict[section] is not None:
+            section_attrib = SECTION_CONFIG_ATTRIB_MAP[section]
             section_class = SECTION_CLASS_MAP[section]
-            config_classes_dict[section] = section_class(**typed_config_dict[section])
+            config_classes_dict[section_attrib] = section_class(**typed_config_dict[section])
 
     config_obj = Config(**config_classes_dict)
 
