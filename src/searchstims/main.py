@@ -5,11 +5,12 @@ from .config import parse
 from .make import make
 
 
-from . import stim_makers
+from .stim_makers import RVvGVStimMaker, Two_v_Five_StimMaker
+from .config.parse import SECTION_CONFIG_ATTRIB_MAP
 
 VALID_STIM_SECTIONS = [
-    'rectangle',
-    'number'
+    'RVvGV',
+    '2_v_5'
 ]
 
 
@@ -57,14 +58,14 @@ def _get_stim_dict(config):
     config : searchstims.config.classes.Config
         instance of Config returned by parse_config
         after parsing a config.ini file
-
     """
     general_config = config.general
 
     stim_dict = {}
     for section in VALID_STIM_SECTIONS:
-        if getattr(config, section) is not None:  # because config.section will be None if not defined in config.ini
-            stim_config = getattr(config, section)
+        section_attr_name = SECTION_CONFIG_ATTRIB_MAP[section]
+        if getattr(config, section_attr_name) is not None:  # because config.section will be None if not in config.ini
+            stim_config = getattr(config, section_attr_name)
             (image_size,
              border_size,
              grid_size,
@@ -72,29 +73,29 @@ def _get_stim_dict(config):
              item_bbox_size,
              jitter) = _get_common_args_from_stim_or_general(stim_config, general_config)
 
-            if section == 'rectangle':
-                stim_maker = stim_makers.RectangleStimMaker(target_color=stim_config.target_color,
-                                                            distractor_color=stim_config.distractor_color,
-                                                            window_size=image_size,
-                                                            border_size=border_size,
-                                                            grid_size=grid_size,
-                                                            min_center_dist=min_center_dist,
-                                                            item_bbox_size=item_bbox_size,
-                                                            jitter=jitter
-                                                            )
+            if section == 'RVvGV':
+                stim_maker = RVvGVStimMaker(target_color=stim_config.target_color,
+                                            distractor_color=stim_config.distractor_color,
+                                            window_size=image_size,
+                                            border_size=border_size,
+                                            grid_size=grid_size,
+                                            min_center_dist=min_center_dist,
+                                            item_bbox_size=item_bbox_size,
+                                            jitter=jitter
+                                            )
 
-            elif section == 'number':
-                stim_maker = stim_makers.NumberStimMaker(target_color=stim_config.target_color,
-                                                         distractor_color=stim_config.distractor_color,
-                                                         window_size=image_size,
-                                                         border_size=border_size,
-                                                         grid_size=grid_size,
-                                                         min_center_dist=min_center_dist,
-                                                         item_bbox_size=item_bbox_size,
-                                                         jitter=jitter,
-                                                         target_number=stim_config.target_number,
-                                                         distractor_number=stim_config.distractor_number
-                                                         )
+            elif section == '2_v_5':
+                stim_maker = Two_v_Five_StimMaker(target_color=stim_config.target_color,
+                                                  distractor_color=stim_config.distractor_color,
+                                                  window_size=image_size,
+                                                  border_size=border_size,
+                                                  grid_size=grid_size,
+                                                  min_center_dist=min_center_dist,
+                                                  item_bbox_size=item_bbox_size,
+                                                  jitter=jitter,
+                                                  target_number=stim_config.target_number,
+                                                  distractor_number=stim_config.distractor_number
+                                                  )
             stim_dict[section] = stim_maker
 
     return stim_dict
