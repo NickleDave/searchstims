@@ -15,7 +15,10 @@ https://en.wikipedia.org/wiki/Visual_search
 There are links to example configuration files below.
 
 For a recent review of factors influencing visual search, please see:  
-http://search.bwh.harvard.edu/new/pubs/FiveFactors_Wolfe-Horowitz_2017.pdf
+<http://search.bwh.harvard.edu/new/pubs/FiveFactors_Wolfe-Horowitz_2017.pdf>
+
+For a dataset of human subjects performing a similar visual search task, please see:
+<http://search.bwh.harvard.edu/new/data_set_files.html>
 
 ## Installation
 `pip install searchstims`
