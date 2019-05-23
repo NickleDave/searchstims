@@ -13,7 +13,7 @@ set_sizes = [1, 2, 4, 6, 8]
 output_dir = ~/output
 json_filename = filenames_by_set_size_and_target.json
 
-[rectangle]
+[RVvGV]
 rects_width_height = (10,30)
 ```
 
@@ -33,7 +33,7 @@ number divided by the length of this list. E.g., If `num_target_present = 25`, a
 then be loaded as a Python dictionary with the keys `present` and `absent`. 
 
 ## `[stimulus]` section
-Currently valid stimulus types are `rectangle` and `number`. Options common to both are defined here. 
+Currently valid stimulus types are `RGvGV` and `2_v_5`. Options common to both are defined here. 
 Stimulus-specific options are defined in the sections below that show defaults values for each stimulus.
 
 * `rects_width_height` : tuple  
@@ -77,7 +77,7 @@ to: `{'white', 'red', 'green'}`.
 * `distractor_color` : str
    color of distractors. Specified in the same way as `target_color`.
 
-### `[rectangle]`
+### `[RGvGV]`
 Colored rectangles, a typical stimulus that allows for "efficient" search.
 The defaults are as follows:
 ```ini
@@ -91,7 +91,7 @@ target_color = red
 distractor_color = green
 ```
 
-### `[number]`
+### `[2_v_5]`
 Digital 5s and 2s, a stimulus that results in "inefficient" search.
 The defaults are as follows:
 ```ini
