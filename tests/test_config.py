@@ -5,7 +5,7 @@ import unittest
 import tempfile
 
 import searchstims.config
-
+from searchstims.config.parse import SECTION_CONFIG_ATTRIB_MAP
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_CONFIG_FILE = os.path.join(
@@ -25,11 +25,24 @@ class TestConfig(unittest.TestCase):
                                      config_obj,
                                      section_name_list):
         """helper function that checks all option not set by user are
-        set to default by searchstims.config.parse"""
+        set to default by searchstims.config.parse
+
+        Parameters
+        ----------
+        config_parser : ConfigParser
+            with config.ini file loaded into it
+        config_obj : searchstims.config.classes.Config
+            returned by searchstims.config.parse
+        section_name_list : list
+            of str, names of sections to compare to default
+        """
         option_was_set_to_default = []
         for section in section_name_list:
-            section_obj = getattr(config_obj, section)
-            default_section_obj = getattr(self.default_config_obj, section)
+            # get name of attribute on Config object
+            section_attr_name = SECTION_CONFIG_ATTRIB_MAP[section]
+            section_obj = getattr(config_obj, section_attr_name)
+            default_section_obj = getattr(self.default_config_obj, section_attr_name)
+            # here don't use attribute name, use name in config.ini file
             default_section = self.default_config[section]
             config_section = config_parser[section]
             for option in default_section.keys():
@@ -45,7 +58,6 @@ class TestConfig(unittest.TestCase):
         else:
             return False
 
-
     def test_no_general_section_raises_error(self):
         tmp_dir = tempfile.mkdtemp()
         default_config_copy = ConfigParser()
@@ -57,36 +69,36 @@ class TestConfig(unittest.TestCase):
         with self.assertRaises(ValueError):
             searchstims.config.parse(config_file=no_general_config_file)
 
-    def test_parse_rectangle_config(self):
+    def test_parse_RVvGV_config(self):
         # get file we need and load into ConfigParser instance to use for tests
-        rectangle_config_file = os.path.join(self.test_configs, 'test_rectangle_config.ini')
-        rectangle_config = ConfigParser()
-        rectangle_config.read(rectangle_config_file)
-        rectangle_config_obj = searchstims.config.parse(rectangle_config_file)
+        RVvGV_config_file = os.path.join(self.test_configs, 'test_RVvGV_config.ini')
+        RVvGV_config = ConfigParser()
+        RVvGV_config.read(RVvGV_config_file)
+        RVvGV_config_obj = searchstims.config.parse(RVvGV_config_file)
 
-        self.assertTrue(hasattr(rectangle_config_obj, 'general'))
-        self.assertTrue(hasattr(rectangle_config_obj, 'rectangle'))
-        self.assertTrue(rectangle_config_obj.number is None)
+        self.assertTrue(hasattr(RVvGV_config_obj, 'general'))
+        self.assertTrue(hasattr(RVvGV_config_obj, 'RVvGV'))
+        self.assertTrue(RVvGV_config_obj.Two_v_Five is None)
         self.assertTrue(self._test_defaults_set_correctly(
-            rectangle_config, rectangle_config_obj, ['general', 'rectangle']
+            RVvGV_config, RVvGV_config_obj, ['general', 'RVvGV']
         ))
 
-    def test_parse_number_config(self):
+    def test_parse_Two_v_Five_config(self):
         # get file we need and load into ConfigParser instance to use for tests
-        number_config_file = os.path.join(self.test_configs, 'test_number_config.ini')
-        number_config = ConfigParser()
-        number_config.read(number_config_file)
-        number_config_obj = searchstims.config.parse(number_config_file)
+        Two_v_Five_config_file = os.path.join(self.test_configs, 'test_2_v_5_config.ini')
+        Two_v_Five_config = ConfigParser()
+        Two_v_Five_config.read(Two_v_Five_config_file)
+        Two_v_Five_config_obj = searchstims.config.parse(Two_v_Five_config_file)
 
-        self.assertTrue(hasattr(number_config_obj, 'general'))
-        self.assertTrue(hasattr(number_config_obj, 'number'))
-        self.assertTrue(number_config_obj.rectangle is None)
+        self.assertTrue(hasattr(Two_v_Five_config_obj, 'general'))
+        self.assertTrue(hasattr(Two_v_Five_config_obj, 'Two_v_Five'))
+        self.assertTrue(Two_v_Five_config_obj.RVvGV is None)
 
         self.assertTrue(self._test_defaults_set_correctly(
-            number_config, number_config_obj, ['general', 'number']
+            Two_v_Five_config, Two_v_Five_config_obj, ['general', '2_v_5']
         ))
 
-    def test_parse_rectangle_number_config(self):
+    def test_parse_RVvGV_Two_v_Five_config(self):
         # get file we need and load into ConfigParser instance to use for tests
         config_file = os.path.join(self.test_configs, 'test_config_feature_spatial_vgg16.ini')
         config = ConfigParser()
@@ -94,11 +106,11 @@ class TestConfig(unittest.TestCase):
         config_obj = searchstims.config.parse(config_file)
 
         self.assertTrue(hasattr(config_obj, 'general'))
-        self.assertTrue(hasattr(config_obj, 'rectangle'))
-        self.assertTrue(hasattr(config_obj, 'number'))
+        self.assertTrue(hasattr(config_obj, 'RVvGV'))
+        self.assertTrue(hasattr(config_obj, 'Two_v_Five'))
 
         self.assertTrue(self._test_defaults_set_correctly(
-            config, config_obj, ['general', 'rectangle', 'number']
+            config, config_obj, ['general', 'RVvGV', '2_v_5']
         ))
 
 
