@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] 2019-05-22
+### Added
+- ability to specify colors for targets and distractors as tuples corresponding to 
+RGB color codes; currently this only works if you write your own script, not if you use `config.ini` files
+
+### Changed
+- names of built-in visual search stimuli are now `RVvGV` and `2_v_5`, hence the major version bump
+
+### Fixed
+- bug that prevented user from making search stimuli where items are placed randomly instead of
+  on a grid
+
 ## [1.2.0] 2019-05-22
 ### Changed
 - refactor `searchstims.make` so it is more general
