@@ -3,6 +3,7 @@ import attr
 from attr.validators import instance_of, optional
 from attr import converters
 
+
 def check_len_is_two(instance, attribute, value):
     if len(value) != 2:
         raise ValueError(f"{attribute.name} tuple for {instance.name} should be two elements, got {value}")
@@ -75,8 +76,8 @@ class GeneralConfig:
 
 
 @attr.s
-class RectangleConfig:
-    """represent [RECTANGLE] section of config.ini file
+class RVvGVConfig:
+    """represent [RVvGV] section of config.ini file
 
     Attributes
     ----------
@@ -136,8 +137,8 @@ def number_validator(instance, attribute, value):
 
 
 @attr.s
-class NumberConfig:
-    """represent [NUMBER] section of config.ini file
+class Two_v_Five_Config:
+    """represent [2_v_5] section of config.ini file
 
     Attributes
     ----------
@@ -195,11 +196,11 @@ class Config:
     ----------
     general: TrainConfig
         represents [TRAIN] section
-    rectangle: RectangleConfig
-        represents [RECTANGLE] section
+    RVvGV: RVvVGConfig
+        represents [RVvVG] section
     number: NumberConfig
-        represents [NUMBER] section
+        represents [2_v_5] section
     """
     general = attr.ib(GeneralConfig)
-    rectangle = attr.ib(validator=optional(instance_of(RectangleConfig)), default=None)
-    number = attr.ib(validator=optional(instance_of(NumberConfig)), default=None)
+    RVvGV = attr.ib(validator=optional(instance_of(RVvGVConfig)), default=None)
+    Two_v_Five = attr.ib(validator=optional(instance_of(Two_v_Five_Config)), default=None)
