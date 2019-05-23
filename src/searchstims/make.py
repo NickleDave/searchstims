@@ -230,14 +230,11 @@ def make(root_output_dir,
                     ):
                         os.makedirs(os.path.join(this_stim_name_output_dir, str(set_size), target))
 
-                    all_cells_to_use, all_xx_to_use_ctr, all_yy_to_use_ctr = _generate_xx_and_yy(set_size=set_size,
-                                                                                                 num_imgs=len(img_nums),
-                                                                                                 stim_maker=stim_maker)
+                    def _make_stim(img_num, cells_to_use=None, xx_to_use_ctr=None, yy_to_use_ctr=None):
+                        """helper function to make and save individual stim
 
-                    for img_num, cells_to_use, xx_to_use_ctr, yy_to_use_ctr in zip(img_nums,
-                                                                                   all_cells_to_use,
-                                                                                   all_xx_to_use_ctr,
-                                                                                   all_yy_to_use_ctr):
+                        Define as a nested function so we can avoid repeating ourselves below
+                        """
                         rect_tuple = stim_maker.make_stim(set_size=set_size,
                                                           num_target=num_target,
                                                           cells_to_use=cells_to_use,
@@ -265,6 +262,22 @@ def make(root_output_dir,
                             'distractor_indices': rect_tuple.distractor_indices,
                         }
                         metadata[stim_name][set_size][target].append(stim_info)
+
+                    if stim_maker.grid_size is None:
+                        for img_num in img_nums:
+                            _make_stim(img_num)
+                    else:
+                        (all_cells_to_use,
+                         all_xx_to_use_ctr,
+                         all_yy_to_use_ctr) = _generate_xx_and_yy(set_size=set_size,
+                                                                  num_imgs=len(img_nums),
+                                                                  stim_maker=stim_maker)
+
+                        for img_num, cells_to_use, xx_to_use_ctr, yy_to_use_ctr in zip(img_nums,
+                                                                                       all_cells_to_use,
+                                                                                       all_xx_to_use_ctr,
+                                                                                       all_yy_to_use_ctr):
+                            _make_stim(img_num, cells_to_use, xx_to_use_ctr, yy_to_use_ctr)
 
     metadata_json = json.dumps(metadata, indent=4)
     json_filename = os.path.expanduser(json_filename)
