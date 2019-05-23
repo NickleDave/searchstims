@@ -56,9 +56,9 @@ class TestMake(unittest.TestCase):
                     self.assertTrue(os.path.isfile(file_that_should_exist))
         return True
 
-    def test_make_rectangle(self):
-        rectangle_config_file = os.path.join(self.test_configs, 'test_rectangle_config.ini')
-        config = parse(rectangle_config_file)
+    def test_make_RVvGV(self):
+        RVvGV_config_file = os.path.join(self.test_configs, 'test_RVvGV_config.ini')
+        config = parse(RVvGV_config_file)
         config.general.output_dir = self.tmp_output_dir
         stim_dict = _get_stim_dict(config)
 
@@ -69,12 +69,12 @@ class TestMake(unittest.TestCase):
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
 
-        self.assertTrue(self._dirs_got_made(config, 'rectangle'))
-        self.assertTrue(self._files_got_made(config, 'rectangle'))
+        self.assertTrue(self._dirs_got_made(config, 'RVvGV'))
+        self.assertTrue(self._files_got_made(config, 'RVvGV'))
 
-    def test_make_number(self):
-        number_config_file = os.path.join(self.test_configs, 'test_number_config.ini')
-        config = parse(number_config_file)
+    def test_make_2_v_5(self):
+        Two_v_Five_config_file = os.path.join(self.test_configs, 'test_2_v_5_config.ini')
+        config = parse(Two_v_Five_config_file)
         config.general.output_dir = self.tmp_output_dir
         stim_dict = _get_stim_dict(config)
 
@@ -85,14 +85,14 @@ class TestMake(unittest.TestCase):
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
 
-        self.assertTrue(self._dirs_got_made(config, 'number'))
-        self.assertTrue(self._files_got_made(config, 'number'))
+        self.assertTrue(self._dirs_got_made(config, '2_v_5'))
+        self.assertTrue(self._files_got_made(config, '2_v_5'))
 
-    def test_make_number_and_rectangle(self):
-        number_config_file = os.path.join(
+    def test_make_Two_v_Five_and_RVvGV(self):
+        Two_v_Five_config_file = os.path.join(
             self.test_configs, 'test_config_feature_spatial_vgg16.ini'
         )
-        config = parse(number_config_file)
+        config = parse(Two_v_Five_config_file)
         config.general.output_dir = self.tmp_output_dir
         stim_dict = _get_stim_dict(config)
 
@@ -103,10 +103,10 @@ class TestMake(unittest.TestCase):
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
 
-        self.assertTrue(self._dirs_got_made(config, 'rectangle'))
-        self.assertTrue(self._files_got_made(config, 'rectangle'))
-        self.assertTrue(self._dirs_got_made(config, 'number'))
-        self.assertTrue(self._files_got_made(config, 'number'))
+        self.assertTrue(self._dirs_got_made(config, 'RVvGV'))
+        self.assertTrue(self._files_got_made(config, 'RVvGV'))
+        self.assertTrue(self._dirs_got_made(config, '2_v_5'))
+        self.assertTrue(self._files_got_made(config, '2_v_5'))
 
     def test_when_general_config_has_common_stim_options(self):
         config_file = os.path.join(self.test_configs, 'test_config_general_has_common_stim_options.ini')
@@ -121,10 +121,10 @@ class TestMake(unittest.TestCase):
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
 
-        self.assertTrue(self._dirs_got_made(config, 'rectangle'))
-        self.assertTrue(self._files_got_made(config, 'rectangle'))
-        self.assertTrue(self._dirs_got_made(config, 'number'))
-        self.assertTrue(self._files_got_made(config, 'number'))
+        self.assertTrue(self._dirs_got_made(config, 'RVvGV'))
+        self.assertTrue(self._files_got_made(config, 'RVvGV'))
+        self.assertTrue(self._dirs_got_made(config, '2_v_5'))
+        self.assertTrue(self._files_got_made(config, '2_v_5'))
 
     def test_enforce_unique(self):
         config_file = os.path.join(self.test_configs, 'test_config_enforce_unique.ini')
@@ -139,8 +139,8 @@ class TestMake(unittest.TestCase):
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
 
-        self.assertTrue(self._dirs_got_made(config, 'rectangle'))
-        self.assertTrue(self._files_got_made(config, 'rectangle'))
+        self.assertTrue(self._dirs_got_made(config, 'RVvGV'))
+        self.assertTrue(self._files_got_made(config, 'RVvGV'))
         fnames_json = glob(os.path.join(self.tmp_output_dir, '*.json'))
         self.assertTrue(len(fnames_json) == 1)
         fnames_json = fnames_json[0]
