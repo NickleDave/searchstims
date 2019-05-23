@@ -33,7 +33,10 @@ number divided by the length of this list. E.g., If `num_target_present = 25`, a
 then be loaded as a Python dictionary with the keys `present` and `absent`. 
 
 ## `[stimulus]` section
-Currently valid stimulus types are `RGvGV` and `2_v_5`. Options common to both are defined here. 
+Currently valid stimulus types are `RGvGV` and `2_v_5`. 
+These section names were chosen to match this dataset: <http://search.bwh.harvard.edu/new/data_set_files.html>  
+
+Options common to both sections are defined here. 
 Stimulus-specific options are defined in the sections below that show defaults values for each stimulus.
 
 * `rects_width_height` : tuple  
