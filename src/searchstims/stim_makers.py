@@ -100,9 +100,9 @@ class AbstractStimMaker:
 
         Parameters
         ----------
-        target_color : str
+        target_color : str, tuple
             {'red', 'green', 'white', 'blue'}. Default is 'red'.
-        distractor_color : str
+        distractor_color : str, tuple
             {'red', 'green', 'white', 'blue'}. Default is 'green'.
         window_size : tuple
             of length two, representing (height, width) of window in pixels.
@@ -134,6 +134,33 @@ class AbstractStimMaker:
 
             if not all([grid_size_el > 0 for grid_size_el in grid_size]):
                 raise ValueError('values for grid size must be positive integers')
+
+        if type(target_color) not in (str, tuple):
+            raise TypeError('target_color must be a string or a three-element tuple corresponding to an RGB color')
+
+        if type(target_color) == tuple:
+            if len(target_color) != 3:
+                raise ValueError(
+                    f'target_color tuple must be a 3 element RGB color; number of elements was {len(target_color)}'
+                )
+            if not all([type(el) == int for el in target_color]):
+                raise ValueError(
+                    'all elements in target_color tuple should be of type int'
+                )
+
+        if type(distractor_color) not in (str, tuple):
+            raise TypeError('distractor_color must be a string or a three-element tuple corresponding to an RGB color')
+
+        if type(distractor_color) == tuple:
+            if len(distractor_color) != 3:
+                raise ValueError(
+                    'distractor_color tuple must be a 3 element RGB color; '
+                    f'number of elements was {len(distractor_color)}'
+                )
+            if not all([type(el) == int for el in distractor_color]):
+                raise ValueError(
+                    'all elements in distractor_color tuple should be of type int'
+                )
 
         self.target_color = target_color
         self.distractor_color = distractor_color
@@ -448,6 +475,10 @@ class RectangleStimMaker(AbstractStimMaker):
             color = self.target_color
         else:
             color = self.distractor_color
+
+        if type(color) == str:
+            color = colors_dict[color]
+
         rect_to_draw = item_bbox  # yes, they point to the same object
 
         width = rect_to_draw.width
@@ -455,8 +486,7 @@ class RectangleStimMaker(AbstractStimMaker):
         rect_to_draw.width = width
         rect_to_draw.left = rect_to_draw.left + width
 
-        pygame.draw.rect(display_surface, colors_dict[color], rect_to_draw)
-
+        pygame.draw.rect(display_surface, color, rect_to_draw)
 
 
 class NumberStimMaker(AbstractStimMaker):
