@@ -9,8 +9,8 @@ Python package to make stimuli like those used in classic visual search experime
 https://en.wikipedia.org/wiki/Visual_search  
 ... but with the exact size to feed them to your favorite neural network.
 
-![efficient_search](doc/redvert_v_greenvert_set_size_4_target_present_55.png)
-![inefficient_search](doc/two_v_five_set_size_6_target_present_78.png)
+![feature_search](doc/redvert_v_greenvert_set_size_4_target_present_55.png)
+![spatial_config_search](doc/two_v_five_set_size_6_target_present_78.png)
 
 There are links to example configuration files below.
 
