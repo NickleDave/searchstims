@@ -1,5 +1,6 @@
 import os
 from collections import namedtuple
+import random
 
 import pygame
 from pygame.locals import *
@@ -194,7 +195,7 @@ class AbstractStimMaker:
             self.cell_width = round(self.grid_size_pixels[1] / self.grid_size[1])
             self.cell_x_center = round((self.grid_size_pixels[1] / self.grid_size[1]) / 2)
 
-    def draw_item(self, display_surface, item_bbox, is_target):
+    def draw_item(self, display_surface, item_bbox, color=None, to_blit=None):
         """draw item for visual search stimulus
 
         Parameters
@@ -203,13 +204,55 @@ class AbstractStimMaker:
         item_bbox : pygame.rect
             item bounding box. The actual item is drawn
             *within* this bounding box.
-        is_target : bool
-            if True, item to be drawn is a target.
-            if False, item to be drawn is a distractor.
-            How the item is drawn (color, orientation, shape, etc.) will
-            depend on whether this is True or False
+        color : tuple
+            3-item tuple, i.e. RGB color.
+        to_blit : pygame.image
+            image to blit onto item_bbox
         """
         raise NotImplementedError
+
+    def _make_stim(self,
+                   set_size,
+                   xx_to_use_ctr,
+                   yy_to_use_ctr,
+                   target_inds,
+                   cells_to_use,
+                   display_surface):
+        """helper function used by make_stim
+        that sub-classes can override if they need to do something more
+        complicated when making the visual search stimulus"""
+        target_indices = []
+        distractor_indices = []
+        if self.grid_size:
+            grid_as_char = [''] * self.num_cells
+        else:
+            grid_as_char = None
+
+        for item in range(set_size):
+            # notice we are now using PyGame order of sizes, (width, height)
+            item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
+            item_bbox = Rect(item_bbox_tuple)
+            center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
+            item_bbox.center = center
+            if item in target_inds:
+                color = self.target_color
+                target_indices.append(center)
+                if self.grid_size:
+                    grid_as_char[cells_to_use[item]] = 't'
+            else:
+                color = self.distractor_color
+                distractor_indices.append(center)
+                if self.grid_size:
+                    grid_as_char[cells_to_use[item]] = 'd'
+
+            if type(color) == str:
+                color = colors_dict[color]
+
+            self.draw_item(display_surface=display_surface,
+                           item_bbox=item_bbox,
+                           color=color)
+
+        return grid_as_char, target_indices, distractor_indices
 
     def make_stim(self,
                   set_size=8,
@@ -414,32 +457,17 @@ class AbstractStimMaker:
         display_surface.fill(colors_dict['black'])
         target_inds = np.random.choice(np.arange(set_size),
                                        size=num_target).tolist()
-        target_indices = []
-        distractor_indices = []
-        if self.grid_size:
-            grid_as_char = [''] * self.num_cells
-        else:
-            grid_as_char = None
 
-        for item in range(set_size):
-            # notice we are now using PyGame order of sizes, (width, height)
-            item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
-            item_bbox = Rect(item_bbox_tuple)
-            center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
-            item_bbox.center = center
-            if item in target_inds:
-                is_target = True
-                target_indices.append(center)
-                if self.grid_size:
-                    grid_as_char[cells_to_use[item]] = 't'
-            else:
-                is_target = False
-                distractor_indices.append(center)
-                if self.grid_size:
-                    grid_as_char[cells_to_use[item]] = 'd'
-            self.draw_item(display_surface=display_surface,
-                           item_bbox=item_bbox,
-                           is_target=is_target)
+        # call helper function that actually makes search stimulus
+        # (added so that sub-classes can override just that function if they need to)
+        (grid_as_char,
+         target_indices,
+         distractor_indices) = self._make_stim(set_size,
+                                               xx_to_use_ctr,
+                                               yy_to_use_ctr,
+                                               target_inds,
+                                               cells_to_use,
+                                               display_surface)
 
         if self.grid_size:
             grid_as_char = np.asarray(grid_as_char).reshape(self.grid_size[0], self.grid_size[1]).tolist()
@@ -454,7 +482,7 @@ class AbstractStimMaker:
 class RVvGVStimMaker(AbstractStimMaker):
     """Make visual search stimuli with vertical rectangles
     where target is red and distractors are green."""
-    def draw_item(self, display_surface, item_bbox, is_target):
+    def draw_item(self, display_surface, item_bbox, color):
         """Draws a vertical rectangle that is 1/3 the width of the item bounding box.
 
         Parameters
@@ -471,14 +499,6 @@ class RVvGVStimMaker(AbstractStimMaker):
         -------
         None
         """
-        if is_target:
-            color = self.target_color
-        else:
-            color = self.distractor_color
-
-        if type(color) == str:
-            color = colors_dict[color]
-
         rect_to_draw = item_bbox  # yes, they point to the same object
 
         width = rect_to_draw.width
@@ -487,6 +507,120 @@ class RVvGVStimMaker(AbstractStimMaker):
         rect_to_draw.left = rect_to_draw.left + width
 
         pygame.draw.rect(display_surface, color, rect_to_draw)
+
+
+class RVvRHGVStimMaker(AbstractStimMaker):
+    """Make visual search stimuli with rectangles,
+    where target is red vertical rectangle. Half of distractors
+    will be vertical green rectangles and the other half will
+    be horizontal red rectangles. If the target is present,
+    then (half - 1) of the distractors will be horizontal red
+    rectangles."""
+
+    def _make_stim(self,
+                   set_size,
+                   xx_to_use_ctr,
+                   yy_to_use_ctr,
+                   target_inds,
+                   cells_to_use,
+                   display_surface):
+        """helper function used by make_stim
+        that sub-classes can override if they need to do something more
+        complicated when making the visual search stimulus"""
+        target_indices = []
+        distractor_indices = []
+        if self.grid_size:
+            grid_as_char = [''] * self.num_cells
+        else:
+            grid_as_char = None
+
+        num_distractors = set_size - len(target_inds)
+        num_vert_rect = set_size // 2
+        if len(target_inds) == 0:
+            num_horz_rect = set_size // 2 - len(target_inds)
+        else:
+            num_horz_rect = set_size // 2
+
+        if num_distractors % 2 == 1:  # e.g., if odd set size and target absent
+            diff = num_distractors - (num_vert_rect + num_horz_rect)
+            for _ in range(diff):
+                if random.uniform(0, 1) > 0.5:
+                    num_vert_rect += 1
+                else:
+                    num_horz_rect += 1
+
+        distractor_orientation = list('V' * num_vert_rect + 'H' * num_horz_rect)
+        random.shuffle(distractor_orientation)
+
+        for item in range(set_size):
+            # notice we are now using PyGame order of sizes, (width, height)
+            item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
+            item_bbox = Rect(item_bbox_tuple)
+            center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
+            item_bbox.center = center
+
+            if item in target_inds:
+                color = self.target_color
+                rotate = False
+                target_indices.append(center)
+                if self.grid_size:
+                    grid_as_char[cells_to_use[item]] = 't'
+            else:
+                orientation = distractor_orientation.pop()
+                if orientation == 'V':
+                    color = self.distractor_color
+                    rotate = False
+                elif orientation == 'H':
+                    color = self.target_color
+                    rotate = True
+
+                distractor_indices.append(center)
+                if self.grid_size:
+                    grid_as_char[cells_to_use[item]] = orientation
+                    # instead of 'd', so we know which distractor is which
+
+            if type(color) == str:
+                color = colors_dict[color]
+
+            self.draw_item(display_surface=display_surface,
+                           item_bbox=item_bbox,
+                           color=color,
+                           rotate=rotate)
+
+        return grid_as_char, target_indices, distractor_indices
+
+    def draw_item(self, display_surface, item_bbox, color, rotate):
+        """Draws a vertical rectangle that is 1/3 the width of the item bounding box.
+
+        Parameters
+        ----------
+        display_surface : pygame.Surface
+            instance of Surface on which to draw item
+        item_bbox : pygame.Rect
+            instance of Rect that represents 'bounding box' within which
+            item should be drawn.
+
+        Returns
+        -------
+        None
+        """
+        # rect_to_draw is same object as item_bbox, but we're going to change the
+        # "bounding box" into the items we will draw
+        rect_to_draw = item_bbox
+
+        if rotate:
+            height = rect_to_draw.height // 3
+            rect_to_draw.height = height
+            rect_to_draw.bottom = rect_to_draw.bottom + height
+        else:
+            width = rect_to_draw.width // 3
+            rect_to_draw.width = width
+            rect_to_draw.left = rect_to_draw.left + width
+
+        pygame.draw.rect(display_surface, color, rect_to_draw)
+
+
+
 
 
 class Two_v_Five_StimMaker(AbstractStimMaker):
@@ -543,9 +677,44 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
                                                               self.distractor_color)])
         self.distractor = pygame.image.load(self.distractor_png)
 
-    def draw_item(self, display_surface, item_bbox, is_target):
+    def draw_item(self, display_surface, item_bbox, to_blit):
         """Returns target or distractor"""
-        if is_target:
-            display_surface.blit(self.target, item_bbox)
+        display_surface.blit(to_blit, item_bbox)
+
+    def _make_stim(self,
+                   set_size,
+                   xx_to_use_ctr,
+                   yy_to_use_ctr,
+                   target_inds,
+                   cells_to_use,
+                   display_surface):
+        """helper function used by make_stim
+        that sub-classes can override if they need to do something more
+        complicated when making the visual search stimulus"""
+        target_indices = []
+        distractor_indices = []
+        if self.grid_size:
+            grid_as_char = [''] * self.num_cells
         else:
-            display_surface.blit(self.distractor, item_bbox)
+            grid_as_char = None
+
+        for item in range(set_size):
+            # notice we are now using PyGame order of sizes, (width, height)
+            item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
+            item_bbox = Rect(item_bbox_tuple)
+            center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
+            item_bbox.center = center
+            if item in target_inds:
+                to_blit = self.target
+                target_indices.append(center)
+                if self.grid_size:
+                    grid_as_char[cells_to_use[item]] = 't'
+            else:
+                to_blit = self.distractor
+                distractor_indices.append(center)
+                if self.grid_size:
+                    grid_as_char[cells_to_use[item]] = 'd'
+
+            self.draw_item(display_surface, item_bbox, to_blit)
+
+        return grid_as_char, target_indices, distractor_indices
