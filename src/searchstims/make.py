@@ -122,12 +122,28 @@ def make(root_output_dir,
 
     Parameters
     ----------
+    root_output_dir : str, Path
+        directory in which output should be saved
+    stim_dict : dict
+        key, value pairs where the key is the visual search stimulus name and the 'value' is
+        an instance of a StimMaker
+    json_filename : str
+        name for .json file that will be saved containing metadata about generated set of images (see Notes below).
+    num_target_present : int
+        number of visual search stimuli to generate with target present.
+    num_target_absent : int
+        number of visual search stimuli to generate with target absent.
+    set_sizes : list
+        of int, e.g. [1, 2, 4, 8]. The number of stimuli generated for each set size will be
+        num_target_present // len(set_size). E.g., 4800 / 4 = 1200 images per set size
 
     Returns
     -------
     None
 
-    saves all the stimuli to config_obj.output_dir, and saves information about
+    Notes
+    -----
+    This function saves all the stimuli to output_dir, and saves information about
     stimuli in a .json output file. This .json file is a serialized Python
     dictionary of dictionaries with the following key, field pairs:
     {set size: {
