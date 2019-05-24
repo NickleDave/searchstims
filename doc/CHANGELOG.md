@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] 2019-05-22
+### Added
+- `RVvRHGVStimMaker` class that makes "conjunction" search stimuli
+
+## Changed
+- refactor `AbstractStimMaker`
+  + move core logic for making a single visual search stimulus into helper function `_make_stim`
+    which is called by `make_stim` in main loop after all the set-up code
+  + that way child classes of `AbstractStimMaker` can override `_make_stim` if they need to do
+    something more complicated than what it does
+
 ## [2.0.0] 2019-05-22
 ### Added
 - ability to specify colors for targets and distractors as tuples corresponding to 
