@@ -10,7 +10,15 @@ import pygame
 from .stim_makers import AbstractStimMaker
 
 
-def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
+def _generate_xx_and_yy(set_size,
+                        num_imgs,
+                        stim_maker):
+    """helper function that computes x,y co-ordinates for items in visual search stimulus
+
+    ensures that there are no repeated images in dataset
+
+    finds number of combinations of cells given set size of stimulus and grid size specified for it
+    """
     # get all combinations of cells (combination because order doesn't matter, just which cells get used)
     # a cell combination is an unordered set of k cells from a grid with a total of n cells
     # e.g. if there are 25 cells in a 5x5 grid and you want all combinations k=1, then the
@@ -18,6 +26,9 @@ def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
     # and all combinations k=2 will be [(0,1), (0,2), (0,3), ... (1,2), (1,3), ... (23, 24)]
     # (there are no repeats; once we draw a cell we don't replace it since we just put one item in each cell)
     cell_combs = list(combinations(iterable=range(stim_maker.num_cells), r=set_size))
+
+    # if there are less combinations then there are number of images, we need to make sure we make jitter
+    # unique so we don't get any repeat images
     if len(cell_combs) < num_imgs:
         num_repeat = ceil(num_imgs / len(cell_combs))
         make_jitter_unique = True
@@ -74,7 +85,7 @@ def _generate_xx_and_yy(set_size, num_imgs, stim_maker):
         else:
             jitter_rand = random.choices(jitter_product, k=len(all_cells_to_use))
             cell_and_jitter = zip(all_cells_to_use, jitter_rand)
-    else:
+    else:  # if jitter == 0
         jitter_none = [None] * len(all_cells_to_use)
         cell_and_jitter = zip(all_cells_to_use, jitter_none)
 
