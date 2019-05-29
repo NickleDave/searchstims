@@ -129,10 +129,16 @@ def make(root_output_dir,
         an instance of a StimMaker
     json_filename : str
         name for .json file that will be saved containing metadata about generated set of images (see Notes below).
-    num_target_present : int
+    num_target_present : int, list
         number of visual search stimuli to generate with target present.
-    num_target_absent : int
+        If int, the number of stimuli generated for each set size will be num_target_present // len(set_sizes).
+        List should be same length as set_sizes with an int value for each set size, the number of 'target present'
+        images to make for that set size.
+    num_target_absent : int, list
         number of visual search stimuli to generate with target absent.
+        If int, the number of stimuli generated for each set size will be num_target_absent // len(set_sizes).
+        List should be same length as set_sizes with an int value for each set size, the number of 'target absent'
+        images to make for that set size.
     set_sizes : list
         of int, e.g. [1, 2, 4, 8]. The number of stimuli generated for each set size will be
         num_target_present // len(set_size). E.g., 4800 / 4 = 1200 images per set size
@@ -200,6 +206,38 @@ def make(root_output_dir,
                 f'stim_maker not recognized as a subclass of AbstractStimMaker, type was {stim_maker}'
             )
 
+    if type(num_target_present) not in (int, list):
+        raise TypeError(
+            f'num_target_present should be int or list but type was: {type(num_target_present)}'
+        )
+
+    if type(num_target_present) is list:
+        if len(num_target_present) != len(set_sizes):
+            raise ValueError(
+                'num_target_present must be same length as set_sizes'
+            )
+
+        if not all([type(num) is int for num in num_target_present]):
+            raise ValueError(
+                'all values in num_target_present should be int'
+            )
+
+    if type(num_target_absent) not in (int, list):
+        raise TypeError(
+            f'num_target_present should be int or list but type was: {type(num_target_absent)}'
+        )
+
+    if type(num_target_absent) is list:
+        if len(num_target_absent) != len(set_sizes):
+            raise ValueError(
+                'num_target_absent must be same length as set_sizes'
+            )
+
+        if not all([type(num) is int for num in num_target_absent]):
+            raise ValueError(
+                'all values in num_target_absent should be int'
+            )
+
     if not os.path.isdir(root_output_dir):
         os.makedirs(root_output_dir)
 
@@ -217,10 +255,17 @@ def make(root_output_dir,
 
             metadata[stim_name] = {}
 
-            num_imgs_present = num_target_present // len(set_sizes)
-            num_imgs_absent = num_target_absent // len(set_sizes)
+            # if num_target_present/absent are int, make into list so we can zip them with set_sizes in main loop
+            if type(num_target_present) is int:
+                num_target_present = num_target_present // len(set_sizes)
+                num_target_present = [num_target_present for _ in range(len(set_sizes))]
 
-            for set_size in set_sizes:
+            if type(num_target_absent) is int:
+                num_target_absent = num_target_absent // len(set_sizes)
+                num_target_absent = [num_target_absent for _ in range(len(set_sizes))]
+
+            for set_size, num_imgs_present, num_imgs_absent in zip(
+                    set_sizes, num_target_present, num_target_absent):
                 # add dict for this set size that will have list of "target present / absent" filenames
                 metadata[stim_name][set_size] = {}
 
