@@ -56,6 +56,27 @@ class TestMake(unittest.TestCase):
                     self.assertTrue(os.path.isfile(file_that_should_exist))
         return True
 
+    def _files_got_made_num_target_present_absent_list(self, config, stim_type,
+                                                       num_target_present, num_target_absent):
+        for set_size, num_imgs_present, num_imgs_absent in zip(
+                config.general.set_sizes, num_target_present, num_target_absent):
+            for target in ('present', 'absent'):
+                if target == 'present':
+                    nums = range(num_imgs_present)
+                elif target == 'absent':
+                    nums = range(num_imgs_absent)
+                for num in nums:
+                    filename = f'{stim_type}_set_size_{set_size}_target_{target}_{num}.png'
+                    # use absolute path to save
+                    file_that_should_exist = os.path.join(self.tmp_output_dir,
+                                                          stim_type,
+                                                          str(set_size),
+                                                          target,
+                                                          filename)
+
+                    self.assertTrue(os.path.isfile(file_that_should_exist))
+        return True
+
     def test_make_RVvGV(self):
         RVvGV_config_file = os.path.join(self.test_configs, 'test_RVvGV_config.ini')
         config = parse(RVvGV_config_file)
@@ -157,6 +178,26 @@ class TestMake(unittest.TestCase):
         print("calculating unique images, this might take a minute.")
         uniq_imgs = np.unique(imgs, axis=0)
         self.assertTrue(imgs.shape == uniq_imgs.shape)  # i.e. assert all images are unique
+
+    def test_num_target_present_absent_are_list(self):
+        config_file = os.path.join(self.test_configs, 'test_RVvGV_config.ini')
+        config = parse(config_file)
+        config.general.output_dir = self.tmp_output_dir
+        stim_dict = _get_stim_dict(config)
+
+        num_target_present = [10, 20, 40, 60, 80]
+        num_target_absent = [10, 20, 40, 60, 80]
+
+        make(root_output_dir=config.general.output_dir,
+             stim_dict=stim_dict,
+             json_filename=config.general.json_filename,
+             num_target_present=num_target_present,
+             num_target_absent=num_target_absent,
+             set_sizes=config.general.set_sizes)
+
+        self.assertTrue(self._dirs_got_made(config, 'RVvGV'))
+        self.assertTrue(self._files_got_made_num_target_present_absent_list(
+            config, 'RVvGV', num_target_present, num_target_absent))
 
 
 if __name__ == '__main__':
