@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] 2019-05-22
+### Added
+- ability to pass `list` for `num_target_present` and `num_target_absent` in `searchstims.make`
+  + to make more of one set size v. another, since "combinatorially speaking" there are many more 
+    ways of making stimuli with larger set sizes, and this seems to affect accuracy on those set 
+    sizes. E.g. with grid of size (5x5) there are 25 pick 1, i.e. 25, ways of making a "target 
+    present" stimulus with set size of 1, whereas with a set size of 8 there are 25 pick 8
+    (~100k) ways of making a target present stimulus (and that's before adding jitter). 
+
 ## [2.1.0] 2019-05-22
 ### Added
 - `RVvRHGVStimMaker` class that makes "conjunction" search stimuli
