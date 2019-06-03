@@ -9,7 +9,7 @@ from searchstims.stim_makers import AbstractStimMaker
 class Two_v_Five_StimMaker(AbstractStimMaker):
     """Make visual search stimuli where the target is a digital 2
     and the distractors are digital 5s."""
-    png_path = os.path.join(os.path.dirname(__file__), 'png')
+    png_path = os.path.join(os.path.dirname(__file__), '..', 'png')
 
     numbers_dict = {
         (2, 'red'): 'two_red.png',
@@ -65,7 +65,6 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
         display_surface.blit(to_blit, item_bbox)
 
     def _make_stim(self,
-                   set_size,
                    xx_to_use_ctr,
                    yy_to_use_ctr,
                    target_inds,
@@ -81,11 +80,11 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
         else:
             grid_as_char = None
 
-        for item in range(set_size):
+        for item, (center_x, center_y) in enumerate(zip(xx_to_use_ctr, yy_to_use_ctr)):
             # notice we are now using PyGame order of sizes, (width, height)
             item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
             item_bbox = Rect(item_bbox_tuple)
-            center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
+            center = (int(center_x), int(center_y))
             item_bbox.center = center
             if item in target_inds:
                 to_blit = self.target

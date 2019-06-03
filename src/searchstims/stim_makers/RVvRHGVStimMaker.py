@@ -16,7 +16,6 @@ class RVvRHGVStimMaker(AbstractStimMaker):
     rectangles."""
 
     def _make_stim(self,
-                   set_size,
                    xx_to_use_ctr,
                    yy_to_use_ctr,
                    target_inds,
@@ -50,11 +49,11 @@ class RVvRHGVStimMaker(AbstractStimMaker):
         distractor_orientation = list('V' * num_vert_rect + 'H' * num_horz_rect)
         random.shuffle(distractor_orientation)
 
-        for item in range(set_size):
+        for item, (center_x, center_y) in enumerate(zip(xx_to_use_ctr, yy_to_use_ctr)):
             # notice we are now using PyGame order of sizes, (width, height)
             item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
             item_bbox = Rect(item_bbox_tuple)
-            center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
+            center = (int(center_x), int(center_y))
             item_bbox.center = center
 
             if item in target_inds:
