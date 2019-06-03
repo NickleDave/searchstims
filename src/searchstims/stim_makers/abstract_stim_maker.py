@@ -210,15 +210,19 @@ class AbstractStimMaker:
         raise NotImplementedError
 
     def _make_stim(self,
-                   set_size,
                    xx_to_use_ctr,
                    yy_to_use_ctr,
                    target_inds,
                    cells_to_use,
                    display_surface):
-        """helper function used by make_stim
-        that sub-classes can override if they need to do something more
-        complicated when making the visual search stimulus"""
+        """helper function used by make_stim that sub-classes can override if they need to do something more
+        complicated when making the visual search stimulus
+
+        uses xx_to_use_ctr and yy_to_use_ctr to create item_bbox Rects for each item in the visual search stimulus.
+        If the item's index is in the list of target_inds then it is a target and the target color is used.
+
+        Each item is drawn while looping through (xx_to_use_ctr, yy_to_use_ctr) by calling self.draw_item
+        """
         target_indices = []
         distractor_indices = []
         if self.grid_size:
@@ -226,12 +230,13 @@ class AbstractStimMaker:
         else:
             grid_as_char = None
 
-        for item in range(set_size):
+        for item, (center_x, center_y) in enumerate(zip(xx_to_use_ctr, yy_to_use_ctr)):
             # notice we are now using PyGame order of sizes, (width, height)
             item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
             item_bbox = Rect(item_bbox_tuple)
-            center = (int(xx_to_use_ctr[item]), int(yy_to_use_ctr[item]))
+            center = (int(center_x), int(center_y))
             item_bbox.center = center
+
             if item in target_inds:
                 color = self.target_color
                 target_indices.append(center)
@@ -460,8 +465,7 @@ class AbstractStimMaker:
         # (added so that sub-classes can override just that function if they need to)
         (grid_as_char,
          target_indices,
-         distractor_indices) = self._make_stim(set_size,
-                                               xx_to_use_ctr,
+         distractor_indices) = self._make_stim(xx_to_use_ctr,
                                                yy_to_use_ctr,
                                                target_inds,
                                                cells_to_use,
