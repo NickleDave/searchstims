@@ -151,8 +151,13 @@ def make(root_output_dir,
         List should be same length as set_sizes with an int value for each set size, the number of 'target absent'
         images to make for that set size.
     set_sizes : list
-        of int, e.g. [1, 2, 4, 8]. The number of stimuli generated for each set size will be
-        num_target_present // len(set_size). E.g., 4800 / 4 = 1200 images per set size
+        of int, e.g. [1, 2, 4, 8]. If num_target_present and num_target_absent are ints, not lists, then
+        the number of stimuli generated for each set size will be num_target_present(absent) // len(set_size).
+        E.g., 4800 / 4 = 1200 images per set size. If num_target_present/absent are lists then each should
+        be the same length as set_sizes and the value at the index corresponding to each set size determines the
+        nubmer of stimuli generated for that set size. E.g. if num_target_present = [1000, 2000, 4000] and
+        set_sizes = [1, 2, 4] then there will be 1000 stimuli with set size 1, 2000 with set size 2, and 4000
+        with set size 4.
 
     Returns
     -------
