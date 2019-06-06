@@ -31,6 +31,8 @@ class RVvRHGVStimMaker(AbstractStimMaker):
         else:
             grid_as_char = None
 
+        # divide distractors up into target color-but-horizontal + distractor color-green vertical bars
+        set_size = len(xx_to_use_ctr)
         num_distractors = set_size - len(target_inds)
         num_vert_rect = set_size // 2
         if len(target_inds) == 0:
