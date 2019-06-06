@@ -30,6 +30,7 @@ def _generate_xx_and_yy(set_size,
     # if there are less combinations then there are number of images, we need to make sure we make jitter
     # unique so we don't get any repeat images
     if len(cell_combs) < num_imgs:
+        # num_repeat: maximum number of times we might use any given cell combination
         num_repeat = ceil(num_imgs / len(cell_combs))
         make_jitter_unique = True
     else:
@@ -56,24 +57,21 @@ def _generate_xx_and_yy(set_size,
         # get cartesian product of jitter range of length 2, i.e. all x-y co-ordinates
         # here we want cartesian product because order does matter, jitter of (1,0) != (0, 1)
         # and because we want repeats, e.g. (2, 2)
-        jitter_product = list(product(jitter_range, repeat=2))
+        jitter_coords = list(product(jitter_range, repeat=2))
 
         if make_jitter_unique:
             # get each unique pairing of possible cell combinations and possible x, y jitters
-            cell_jitter_prod = list(product(cell_combs, jitter_product))
-            if len(cell_jitter_prod) < num_imgs:
+            if len(cell_combs) * len(jitter_coords) < num_imgs:
                 raise ValueError('cannot generate unique x and y co-ordinates for items in number of images specified; '
                                  f'the product of the number of cell combinations {len(all_cells_to_use)} and the '
-                                 f'possible jitter added {len(jitter_product)} is {len(cell_jitter_prod)}, but '
-                                 f'the number of images to generate is {num_imgs}')
+                                 f'possible jitter added {len(jitter_coords)} is {len(cell_combs) * len(jitter_coords)}'
+                                 f', but the number of images to generate is {num_imgs}')
             else:
                 cell_and_jitter = []
                 for this_cell_comb in cell_combs:
-                    this_cell_comb_with_all_jitter = [cell_jitter_tuple
-                                                      for cell_jitter_tuple in cell_jitter_prod
-                                                      if cell_jitter_tuple[0] == this_cell_comb]
-                    this_cell_comb_with_jitter = random.sample(population=this_cell_comb_with_all_jitter,
-                                                               k=num_repeat)
+                    jitter_sample = random.sample(population=jitter_coords, k=num_repeat)
+                    this_cell_comb_with_jitter = [(this_cell_comb, jitter_coord_tup)
+                                                  for jitter_coord_tup in jitter_sample]
                     cell_and_jitter.extend(this_cell_comb_with_jitter)
                 diff = len(cell_and_jitter) - num_imgs
                 # remove extras randomly instead of removing all from the last cell_comb
@@ -83,7 +81,7 @@ def _generate_xx_and_yy(set_size,
                     cell_and_jitter.pop(ind)
                 all_cells_to_use = [cj_tup[0] for cj_tup in cell_and_jitter]
         else:
-            jitter_rand = random.choices(jitter_product, k=len(all_cells_to_use))
+            jitter_rand = random.choices(jitter_coords, k=len(all_cells_to_use))
             cell_and_jitter = zip(all_cells_to_use, jitter_rand)
     else:  # if jitter == 0
         jitter_none = [None] * len(all_cells_to_use)
