@@ -1,4 +1,5 @@
 from pathlib import Path
+import random
 
 import pygame
 from pygame.rect import Rect
@@ -13,20 +14,21 @@ class xoStimMaker(AbstractStimMaker):
 
     forcedsquare_path = str(THIS_FILE_DIR.joinpath('..', 'ttf', 'forced_square.ttf'))
 
-    """Make visual search stimuli with T shapes, where target is rotated 90 degrees."""
+    """Make visual search stimuli where target is 'x' and distractors are 'x's and 'o's.
+    Distractors can be same or different colors.
+    """
     def __init__(self,
-                 target_color='white',
-                 distractor_color='white',
-                 target_rotation=90,
+                 target_x_color='blue',
+                 distractor_x_color='red',
+                 distractor_o_color='red',
                  **kwargs):
-        if type(target_rotation) != int or not(0 < target_rotation < 360):
-            raise ValueError('target_rotation must be an integer between 1 and 359')
-
-        super().__init__(target_color=target_color,
-                         distractor_color=distractor_color,
+        super().__init__(target_color=target_x_color,
+                         distractor_color=distractor_x_color,
                          **kwargs)
 
-        self.target_rotation = target_rotation
+        self.target_x_color = target_x_color
+        self.distractor_x_color = distractor_x_color
+        self.distractor_o_color = distractor_o_color
 
     def _make_stim(self,
                    xx_to_use_ctr,
@@ -49,6 +51,26 @@ class xoStimMaker(AbstractStimMaker):
         else:
             grid_as_char = None
 
+        # divide distractors up into x and o
+        set_size = len(xx_to_use_ctr)
+        num_distractors = set_size - len(target_inds)
+        num_distractor_o = set_size // 2
+        if len(target_inds) == 0:
+            num_distractor_x = set_size // 2 - len(target_inds)
+        else:
+            num_distractor_x = set_size // 2
+
+        if num_distractors % 2 == 1:  # e.g., if odd set size and target absent
+            diff = num_distractors - (num_distractor_o + num_distractor_x)
+            for _ in range(diff):
+                if random.uniform(0, 1) > 0.5:
+                    num_distractor_o += 1
+                else:
+                    num_distractor_x += 1
+
+        distractor_letters = list('x' * num_distractor_x + 'o' * num_distractor_o)
+        random.shuffle(distractor_letters)
+
         for item, (center_x, center_y) in enumerate(zip(xx_to_use_ctr, yy_to_use_ctr)):
             # notice we are now using PyGame order of sizes, (width, height)
             item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
@@ -58,27 +80,31 @@ class xoStimMaker(AbstractStimMaker):
 
             if item in target_inds:
                 is_target = True
-                color = self.target_color
+                color = self.target_x_color
                 target_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 't'
             else:
                 is_target = False
-                color = self.distractor_color
+                distractor_letter = distractor_letters.pop()
+                if distractor_letter == 'x':
+                    color = self.distractor_x_color
+                elif distractor_letter == 'o':
+                    color = self.distractor_o_color
                 distractor_indices.append(center)
                 if self.grid_size:
-                    grid_as_char[cells_to_use[item]] = 'd'
+                    grid_as_char[cells_to_use[item]] = distractor_letter
 
             if type(color) == str:
                 color = colors_dict[color]
 
             font_obj = pygame.font.Font(self.forcedsquare_path, 64)
-            text_surface_obj = font_obj.render('T', True, color)
+            if is_target:
+                text_surface_obj = font_obj.render('x', True, color)
+            else:
+                text_surface_obj = font_obj.render(distractor_letter, True, color)
             text_surface_obj = pygame.transform.scale(text_surface_obj,
                                                       (self.item_bbox_size[1], self.item_bbox_size[0]))
-            if is_target:
-                # rotate AFTER scaling (so same aspect ratio as un-rotated T)
-                text_surface_obj = pygame.transform.rotate(text_surface_obj, self.target_rotation)
 
             self.draw_item(display_surface=display_surface,
                            item_bbox=item_bbox,
