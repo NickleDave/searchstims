@@ -17,16 +17,19 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'searchstims'
-DESCRIPTION = 'generate images like the stimuli used in visual search experiments'
-URL = 'https://github.com/NickleDave/main.py'
-EMAIL = 'nicholdav@gmail.com'
-AUTHOR = 'David Nicholson'
-REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '2.2.0'
-LICENSE = 'BSD'
+about = {}
+with open("src/searchstims/__about__.py") as fp:
+    exec(fp.read(), about)
 
-# What packages are required for this module to be executed?
+NAME = about['__title__']
+DESCRIPTION = about['__summary__']
+URL = about['__uri__']
+EMAIL = about['__email__']
+AUTHOR = about['__author__']
+VERSION = about['__version__']
+LICENSE = about['__license__']
+
+REQUIRES_PYTHON = '>=3.6.0'
 REQUIRED = [
     'pygame',
     'numpy',
@@ -57,14 +60,6 @@ try:
         long_description = '\n' + f.read()
 except FileNotFoundError:
     long_description = DESCRIPTION
-
-# Load the package's __version__.py module as a dictionary.
-about = {}
-if not VERSION:
-    with open(os.path.join(here, NAME, '__version__.py')) as f:
-        exec(f.read(), about)
-else:
-    about['__version__'] = VERSION
 
 
 class UploadCommand(Command):
@@ -108,7 +103,7 @@ class UploadCommand(Command):
 # Where the magic happens:
 setup(
     name=NAME,
-    version=about['__version__'],
+    version=VERSION,
     description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type='text/markdown',
