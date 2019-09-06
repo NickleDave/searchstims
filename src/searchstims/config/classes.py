@@ -18,8 +18,8 @@ class GeneralConfig:
     output_dir : str
         path to directory where images and .json file created by running searchstims
         should be saved
-    json_filename : str
-        name of .json file that will be created with information about images created
+    csv_filename : str
+        name of .csv file that will be created with information about images created
     enforce_unique : bool
         if True, ensures that each stimulus is unique by drawing without replacement all
         item locations *before* generating any of the stimuli
@@ -58,7 +58,7 @@ class GeneralConfig:
         maximum value of jitter applied to center points of items.
     """
     output_dir = attr.ib(validator=instance_of(str))
-    json_filename = attr.ib(validator=instance_of(str))
+    csv_filename = attr.ib(validator=instance_of(str))
     num_target_present = attr.ib(converter=converters.optional(int))
     num_target_absent = attr.ib(converter=converters.optional(int))
     set_sizes = attr.ib(validator=optional(instance_of(list)))
