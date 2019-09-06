@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] 2019-09-06
+### Added
+- other `StimMaker` classes
+
+### Changed
+- `searchstims.make` now outputs a .csv file instead of a .json file
+  + meaning metadata for each image is now in long-form that's easy to
+    parse with a library like Pandas, instead of a confusing nested
+    dictionaries-list structure
+  + some metadata like item locations does not fit well in table format
+    so that data is saved in individual `.meta.json` files, one for each
+    `.png` image file.
+    - specifically, the `.meta.json` files contain
+      + `target_indices`: location of target, if present; i.e. the
+        indices to access the center of the target in an array
+        representing the image
+      + `distractor_indices`: same as `target_indices` but for
+        distractor items in the search stimulus
+      + `grid_as_char`: when stimulus was generated using a grid of
+        cells, this character representation of the grid and where the
+        items are within it is added to the `.meta.json` file. This can
+        be an easy way to filter by location at the level of the grid,
+- change `Two_v_Five_StimMaker` to use ForcedSquare font instead of .png
+  files
+  + This makes it possible to easily change size of 2 and 5.
+
 ## [2.2.0] 2019-05-22
 ### Added
 - ability to pass `list` for `num_target_present` and `num_target_absent` in `searchstims.make`
