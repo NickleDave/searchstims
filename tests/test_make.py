@@ -1,12 +1,12 @@
 """
 test make module
 """
+import csv
 import os
 import tempfile
 import shutil
 import unittest
 from glob import glob
-import json
 
 import imageio
 import numpy as np
@@ -85,7 +85,7 @@ class TestMake(unittest.TestCase):
 
         make(root_output_dir=config.general.output_dir,
              stim_dict=stim_dict,
-             json_filename=config.general.json_filename,
+             csv_filename=config.general.csv_filename,
              num_target_present=config.general.num_target_present,
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
@@ -101,7 +101,7 @@ class TestMake(unittest.TestCase):
 
         make(root_output_dir=config.general.output_dir,
              stim_dict=stim_dict,
-             json_filename=config.general.json_filename,
+             csv_filename=config.general.csv_filename,
              num_target_present=config.general.num_target_present,
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
@@ -119,7 +119,7 @@ class TestMake(unittest.TestCase):
 
         make(root_output_dir=config.general.output_dir,
              stim_dict=stim_dict,
-             json_filename=config.general.json_filename,
+             csv_filename=config.general.csv_filename,
              num_target_present=config.general.num_target_present,
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
@@ -137,7 +137,7 @@ class TestMake(unittest.TestCase):
 
         make(root_output_dir=config.general.output_dir,
              stim_dict=stim_dict,
-             json_filename=config.general.json_filename,
+             csv_filename=config.general.csv_filename,
              num_target_present=config.general.num_target_present,
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
@@ -155,24 +155,19 @@ class TestMake(unittest.TestCase):
 
         make(root_output_dir=config.general.output_dir,
              stim_dict=stim_dict,
-             json_filename=config.general.json_filename,
+             csv_filename=config.general.csv_filename,
              num_target_present=config.general.num_target_present,
              num_target_absent=config.general.num_target_absent,
              set_sizes=config.general.set_sizes)
 
         self.assertTrue(self._dirs_got_made(config, 'RVvGV'))
         self.assertTrue(self._files_got_made(config, 'RVvGV'))
-        fnames_json = glob(os.path.join(self.tmp_output_dir, '*.json'))
-        self.assertTrue(len(fnames_json) == 1)
-        fnames_json = fnames_json[0]
-        with open(fnames_json, 'r') as fp:
-            fnames_dict = json.load(fp)
-        fnames = [targ_dict['filename']
-                  for stim_type, stim_dict in fnames_dict.items()
-                  for set_size, set_size_dict in stim_dict.items()
-                  for targ, targ_list in set_size_dict.items()
-                  for targ_dict in targ_list
-                  ]
+        fnames_csv = glob(os.path.join(self.tmp_output_dir, '*.csv'))
+        self.assertTrue(len(fnames_csv) == 1)
+        fnames_csv = fnames_csv[0]
+        with open(fnames_csv, 'r') as fp:
+            reader = csv.DictReader(fp)
+            fnames = [row['img_file'] for row in reader]
         imgs = [imageio.imread(os.path.join(self.tmp_output_dir, fname)) for fname in fnames]
         imgs = np.asarray(imgs)
         print("calculating unique images, this might take a minute.")
@@ -190,7 +185,7 @@ class TestMake(unittest.TestCase):
 
         make(root_output_dir=config.general.output_dir,
              stim_dict=stim_dict,
-             json_filename=config.general.json_filename,
+             csv_filename=config.general.csv_filename,
              num_target_present=num_target_present,
              num_target_absent=num_target_absent,
              set_sizes=config.general.set_sizes)
