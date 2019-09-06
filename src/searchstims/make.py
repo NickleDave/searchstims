@@ -1,13 +1,14 @@
-import os
+from itertools import combinations, product
 import json
 from math import ceil
+from pathlib import Path
 import random
-from itertools import combinations, product
 
 import numpy as np
 import pygame
 
 from .stim_makers import AbstractStimMaker
+from .utils import make_csv
 
 
 def _generate_xx_and_yy(set_size,
@@ -123,7 +124,7 @@ def _generate_xx_and_yy(set_size,
 
 def make(root_output_dir,
          stim_dict,
-         json_filename,
+         csv_filename,
          num_target_present,
          num_target_absent,
          set_sizes):
@@ -136,8 +137,8 @@ def make(root_output_dir,
     stim_dict : dict
         key, value pairs where the key is the visual search stimulus name and the 'value' is
         an instance of a StimMaker
-    json_filename : str
-        name for .json file that will be saved containing metadata about generated set of images (see Notes below).
+    csv_filename : str
+        name for .csv file that will be saved containing metadata about generated set of images (see Notes below).
     num_target_present : int, list
         number of visual search stimuli to generate with target present.
         If int, the number of stimuli generated for each set size will be num_target_present // len(set_sizes).
@@ -153,7 +154,7 @@ def make(root_output_dir,
         the number of stimuli generated for each set size will be num_target_present(absent) // len(set_size).
         E.g., 4800 / 4 = 1200 images per set size. If num_target_present/absent are lists then each should
         be the same length as set_sizes and the value at the index corresponding to each set size determines the
-        nubmer of stimuli generated for that set size. E.g. if num_target_present = [1000, 2000, 4000] and
+        number of stimuli generated for that set size. E.g. if num_target_present = [1000, 2000, 4000] and
         set_sizes = [1, 2, 4] then there will be 1000 stimuli with set size 1, 2000 with set size 2, and 4000
         with set size 4.
 
@@ -163,52 +164,62 @@ def make(root_output_dir,
 
     Notes
     -----
-    This function saves all the stimuli to output_dir, and saves information about
-    stimuli in a .json output file. This .json file is a serialized Python
-    dictionary of dictionaries with the following key, field pairs:
-    {set size: {
-        'present': [
-            {'filename': str,
-             'grid_as_char': list,
-            ]
+    This function saves all the stimuli to root_output_dir, and saves information about
+    stimuli in a .csv output file. The .csv file has the following fields:
+        stimulus : str
+            name of visual search stimulus, e.g. 'RVvGV'.
+        set_size : int
+            visual search set size, i.e. total number of targets and distractors
+            in the stimulus.
+        target_condition : str
+            one of {'present', 'absent'}. Whether stimulus contains target.
+        img_num : int
+            a unique index assigned to the image by the main loop that creates them.
+            Makes it possible to distinguish multiple images that would otherwise have
+            the same filename (e.g. because they both have set size of 8 and target
+            present, but the items are in different locations).
+        root_output_dir : str
+            location specified by user where all images are saved
+        img_file : str
+            relative path to image from root_output_dir.
+            So the following produces the absolute path:
+            >>> Path(root_output_dir).joinpath(img_file)
+        meta_file : str
+            relative path to .json metadata file associated with the image.
+            The metadata file contains the indices of the centers of items
+            in the image, i.e. their location. If the images were generated
+            using a grid (instead of randomly placing items) then the metadata
+            will also contain a string representation of where items are in the
+            grid. This string representation can be used to find e.g. all stimuli
+            of set size 8 where the target was on the left side of the image.
 
-    Keys at the top level are set size, the total number of targets and distractors, e.g.,
-    {1, 2, ..., 8}. Each set size key has as its value another dictionary,
-    whose keys are 'present' and 'absent', referring to the visual search target.
-    Each 'present' and 'absent' key has as its value a list of Python dictionaries;
-    each dictionary in the list has info about the actual visual search stimulus image
-    that it corresponds to:
-        filename: str
-            actual visual search stimulus filename
-        grid_as_char: list
-            of list of str. Representation of stimulus as a grid of
-            cells
-        target_indices: list
-            of two-element lists, the x and y co-ordinates for the
-            center of the targets (or indices if you load the image into
-            an array).
-        distractor_indices: list
-            of two-element lists, the x and y co-ordinates for the
-            center of the distractors (or indices if you load the image into
-            an array).
+    The .json metadata files are Python dictionaries with the following key/value pairs:
+        img_filename : str
+            name of image file that metadata is associated with.
+            Included in metadata so user does not have to extract it from filename.
+        target_indices : list
+            co-ordinates of targets, i.e. indices in array representing image.
+            A Numpy array converted to a list.
+        distractor_indices : list
+            co-ordinates of distractors, i.e. indices in array representing image
+            A Numpy array converted to a list.
+        grid_as_char : str
+            Representation of stimulus as characters. This is only added when the stimulus
+            is generated as a grid where the items can appear within cells on the grid.
+            If the stimulus is generated with another method, e.g. randomly placing items,
+            then the value for this key will be None.
 
-    Here is an excerpt from such a file:
-        {'1': {'absent': [{'distractor_indices': [[203, 65]],
-            'filename': '/home/user/output/1/absent/redvert_v_greenvert_set_size_1_target_absent_0.png',
-            'grid_as_char':
-                [['', '', '', '', ''],
-                 ['', '', '', '', 'd'],
-                 ['', '', '', '', ''],
-                 ['', '', '', '', ''],
-                 ['', '', '', '', '']],
-            'target_indices': []},
-           {'distractor_indices': [[111, 21]],
-            'filename': '/home/user/output/1/absent/redvert_v_greenvert_set_size_1_target_absent_1.png',
-            ...
-         '2': {'absent': [{'distractor_indices': [[68, 22], [65, 204]],
-            'filename': '/home/user/output/2/absent/redvert_v_greenvert_set_size_2_target_absent_0.png',
-            'grid_as_char': [['', 'd', '', '', ''],
-            ...
+    Here is an example dictionary from a metadata file:
+    {'img_filename': 'RVvGV/1/absent/redvert_v_greenvert_set_size_1_target_absent_0.png',
+     'target_indices': [],
+     'distractor_indices': [[203, 65]],
+     'grid_as_char':
+            [['', '', '', '', ''],
+             ['', '', '', '', 'd'],
+             ['', '', '', '', ''],
+             ['', '', '', '', ''],
+             ['', '', '', '', '']],
+    }
     """
     for stim_name, stim_maker in stim_dict.items():
         if type(stim_name) != str:
@@ -252,112 +263,110 @@ def make(root_output_dir,
                 'all values in num_target_absent should be int'
             )
 
-    if not os.path.isdir(root_output_dir):
-        os.makedirs(root_output_dir)
+    if type(root_output_dir) == str:
+        root_output_dir = Path(root_output_dir)
 
-    # put filenames and other info in a dict that we serialize as json
-    # so we don't have to do a bunch of string matching to find filenames later,
-    # instead we just load back into Python as a dict 
-    # and can just get all the filenames for a given set size with target present or absent
-    # by using appropriate keys
-    # e.g. fnames_set_size_8_target_present = [stim_info['filename'] for stim_info in out_dict[8]['present']]
-    metadata = {}
+    if not root_output_dir.is_dir():
+        root_output_dir.mkdir(parents=True)
 
-    for stim_name, stim_maker in stim_dict.items():
+    # for csv
+    rows = []
 
-            this_stim_name_output_dir = os.path.join(root_output_dir, stim_name)
+    for stimulus, stim_maker in stim_dict.items():
+        stimulus_output_dir = root_output_dir.joinpath(stimulus)
+        if not stimulus_output_dir.is_dir():
+            stimulus_output_dir.mkdir()
 
-            metadata[stim_name] = {}
+        # if num_target_present/absent are int, make into list
+        # so we can zip them with set_sizes in main loop
+        if type(num_target_present) is int:
+            num_target_present = num_target_present // len(set_sizes)
+            num_target_present = [num_target_present for _ in range(len(set_sizes))]
 
-            # if num_target_present/absent are int, make into list so we can zip them with set_sizes in main loop
-            if type(num_target_present) is int:
-                num_target_present = num_target_present // len(set_sizes)
-                num_target_present = [num_target_present for _ in range(len(set_sizes))]
+        if type(num_target_absent) is int:
+            num_target_absent = num_target_absent // len(set_sizes)
+            num_target_absent = [num_target_absent for _ in range(len(set_sizes))]
 
-            if type(num_target_absent) is int:
-                num_target_absent = num_target_absent // len(set_sizes)
-                num_target_absent = [num_target_absent for _ in range(len(set_sizes))]
+        for set_size, num_imgs_present, num_imgs_absent in zip(
+                set_sizes, num_target_present, num_target_absent):
 
-            for set_size, num_imgs_present, num_imgs_absent in zip(
-                    set_sizes, num_target_present, num_target_absent):
-                # add dict for this set size that will have list of "target present / absent" filenames
-                metadata[stim_name][set_size] = {}
+            set_size_dir = stimulus_output_dir.joinpath(str(set_size))
+            if not set_size_dir.is_dir():
+                set_size_dir.mkdir()
 
-                if not os.path.isdir(
-                    os.path.join(this_stim_name_output_dir, str(set_size))
-                ):
-                    os.makedirs(
-                        os.path.join(this_stim_name_output_dir, str(set_size))
+            for target_condition in ('present', 'absent'):
+                if target_condition == 'present':
+                    img_nums = list(range(num_imgs_present))
+                    num_target = 1
+                elif target_condition == 'absent':
+                    img_nums = list(range(num_imgs_absent))
+                    num_target = 0
+
+                target_condition_dir = set_size_dir.joinpath(target_condition)
+                if not target_condition_dir.is_dir():
+                    target_condition_dir.mkdir()
+
+                def _make_stim(img_num, cells_to_use=None,
+                               xx_to_use_ctr=None, yy_to_use_ctr=None):
+                    """helper function to make and save individual stim
+
+                    Define as a nested function so we can avoid repeating ourselves below
+                    """
+                    rect_tuple = stim_maker.make_stim(set_size=set_size,
+                                                      num_target=num_target,
+                                                      cells_to_use=cells_to_use,
+                                                      xx_to_use_ctr=xx_to_use_ctr,
+                                                      yy_to_use_ctr=yy_to_use_ctr)
+
+                    filename = (
+                        f'{stimulus}_set_size_{set_size}_target_{target_condition}'
+                        f'_{img_num}.png'
                     )
+                    abs_path_filename = target_condition_dir.joinpath(filename)
+                    pygame.image.save(rect_tuple.display_surface,
+                                      str(abs_path_filename))
+                    # use relative path for name of file in csv
+                    # so it won't break anything if we move the whole directory of images
+                    # we can just change 'root_output_dir' instead
+                    img_file = Path(stimulus).joinpath(str(set_size),
+                                                       target_condition,
+                                                       filename)
+                    meta_file = Path(
+                        str(abs_path_filename).replace('.png', '.meta.json')
+                    )
+                    meta_dict = {
+                        'img_file': str(img_file),
+                        'target_indices': rect_tuple.target_indices,
+                        'distractor_indices': rect_tuple.distractor_indices,
+                        'grid_as_char': rect_tuple.grid_as_char,
+                    }
+                    with open(meta_file, 'w') as fp:
+                        json.dump(meta_dict, fp)
 
-                for target in ('present', 'absent'):
-                    # add the actual filename list for 'present' or 'absent'
-                    metadata[stim_name][set_size][target] = []
-                    if target == 'present':
-                        img_nums = list(range(num_imgs_present))
-                        num_target = 1
-                    elif target == 'absent':
-                        img_nums = list(range(num_imgs_absent))
-                        num_target = 0
+                    row = (stimulus,
+                           set_size,
+                           target_condition,
+                           img_num,
+                           root_output_dir,
+                           img_file,
+                           meta_file)
+                    rows.append(row)
 
-                    if not os.path.isdir(
-                            os.path.join(this_stim_name_output_dir, str(set_size), target)
-                    ):
-                        os.makedirs(os.path.join(this_stim_name_output_dir, str(set_size), target))
+                if stim_maker.grid_size is None:
+                    for img_num in img_nums:
+                        _make_stim(img_num)
+                else:
+                    (all_cells_to_use,
+                     all_xx_to_use_ctr,
+                     all_yy_to_use_ctr) = _generate_xx_and_yy(set_size=set_size,
+                                                              num_imgs=len(img_nums),
+                                                              stim_maker=stim_maker)
 
-                    def _make_stim(img_num, cells_to_use=None, xx_to_use_ctr=None, yy_to_use_ctr=None):
-                        """helper function to make and save individual stim
+                    for img_num, cells_to_use, xx_to_use_ctr, yy_to_use_ctr in zip(img_nums,
+                                                                                   all_cells_to_use,
+                                                                                   all_xx_to_use_ctr,
+                                                                                   all_yy_to_use_ctr):
+                        _make_stim(img_num, cells_to_use, xx_to_use_ctr, yy_to_use_ctr)
 
-                        Define as a nested function so we can avoid repeating ourselves below
-                        """
-                        rect_tuple = stim_maker.make_stim(set_size=set_size,
-                                                          num_target=num_target,
-                                                          cells_to_use=cells_to_use,
-                                                          xx_to_use_ctr=xx_to_use_ctr,
-                                                          yy_to_use_ctr=yy_to_use_ctr)
-
-                        filename = (
-                            f'{stim_name}_set_size_{set_size}_target_{target}_{img_num}.png'
-                        )
-
-                        # use absolute path to save
-                        absolute_path_filename = os.path.join(this_stim_name_output_dir,
-                                                              str(set_size),
-                                                              target,
-                                                              filename)
-                        pygame.image.save(rect_tuple.display_surface, absolute_path_filename)
-                        # use relative path for name of file in .json
-                        # so it won't break anything if we move the whole directory of images around;
-                        # --> it's the job of code the images to know where directory is at
-                        relative_path_filename = os.path.join(stim_name, str(set_size), target, filename)
-                        stim_info = {
-                            'filename': relative_path_filename,
-                            'grid_as_char': rect_tuple.grid_as_char,
-                            'target_indices': rect_tuple.target_indices,
-                            'distractor_indices': rect_tuple.distractor_indices,
-                        }
-                        metadata[stim_name][set_size][target].append(stim_info)
-
-                    if stim_maker.grid_size is None:
-                        for img_num in img_nums:
-                            _make_stim(img_num)
-                    else:
-                        (all_cells_to_use,
-                         all_xx_to_use_ctr,
-                         all_yy_to_use_ctr) = _generate_xx_and_yy(set_size=set_size,
-                                                                  num_imgs=len(img_nums),
-                                                                  stim_maker=stim_maker)
-
-                        for img_num, cells_to_use, xx_to_use_ctr, yy_to_use_ctr in zip(img_nums,
-                                                                                       all_cells_to_use,
-                                                                                       all_xx_to_use_ctr,
-                                                                                       all_yy_to_use_ctr):
-                            _make_stim(img_num, cells_to_use, xx_to_use_ctr, yy_to_use_ctr)
-
-    metadata_json = json.dumps(metadata, indent=4)
-    json_filename = os.path.expanduser(json_filename)
-    if os.path.split(json_filename)[0] == '':
-        json_filename = os.path.join(root_output_dir, json_filename)
-
-    with open(json_filename, 'w') as json_fp:
-        print(metadata_json, file=json_fp)
+    csv_filename = root_output_dir.joinpath(csv_filename)
+    make_csv(rows, csv_filename)
