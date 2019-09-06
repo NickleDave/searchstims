@@ -1,24 +1,18 @@
-import os
+from pathlib import Path
 
 import pygame
 from pygame.rect import Rect
 
-from searchstims.stim_makers import AbstractStimMaker
+from .abstract_stim_maker import AbstractStimMaker
+from .abstract_stim_maker import colors_dict
+
+THIS_FILE_DIR = Path(__file__).parent
 
 
 class Two_v_Five_StimMaker(AbstractStimMaker):
     """Make visual search stimuli where the target is a digital 2
     and the distractors are digital 5s."""
-    png_path = os.path.join(os.path.dirname(__file__), '..', 'png')
-
-    numbers_dict = {
-        (2, 'red'): 'two_red.png',
-        (2, 'green'): 'two_green.png',
-        (2, 'white'): 'two_white.png',
-        (5, 'red'): 'five_red.png',
-        (5, 'green'): 'five_green.png',
-        (5, 'white'): 'five_white.png',
-    }
+    forcedsquare_path = str(THIS_FILE_DIR.joinpath('..', 'ttf', 'forced_square.ttf'))
 
     def __init__(self,
                  target_color='white',
@@ -49,16 +43,8 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
                          min_center_dist=min_center_dist,
                          item_bbox_size=item_bbox_size,
                          jitter=jitter)
-        self.target_number = target_number
-        self.distractor_number = distractor_number
-        self.target_png = os.path.join(self.png_path,
-                                       self.numbers_dict[(self.target_number,
-                                                          self.target_color)])
-        self.target = pygame.image.load(self.target_png)
-        self.distractor_png = os.path.join(self.png_path,
-                                           self.numbers_dict[(self.distractor_number,
-                                                              self.distractor_color)])
-        self.distractor = pygame.image.load(self.distractor_png)
+        self.target_number = str(target_number)
+        self.distractor_number = str(distractor_number)
 
     def draw_item(self, display_surface, item_bbox, to_blit):
         """Returns target or distractor"""
@@ -86,17 +72,36 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
             item_bbox = Rect(item_bbox_tuple)
             center = (int(center_x), int(center_y))
             item_bbox.center = center
+
             if item in target_inds:
-                to_blit = self.target
+                is_target = True
+                color = self.target_color
                 target_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 't'
             else:
-                to_blit = self.distractor
+                is_target = False
+                color = self.distractor_color
                 distractor_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 'd'
 
-            self.draw_item(display_surface, item_bbox, to_blit)
+            if type(color) == str:
+                color = colors_dict[color]
+
+            font_obj = pygame.font.Font(self.forcedsquare_path, 64)
+            if is_target:
+                text_surface_obj = font_obj.render(self.target_number,
+                                                   True, color)
+            else:
+                text_surface_obj = font_obj.render(self.distractor_number,
+                                                   True, color)
+            text_surface_obj = pygame.transform.scale(text_surface_obj,
+                                                      (self.item_bbox_size[1],
+                                                       self.item_bbox_size[0]))
+
+            self.draw_item(display_surface=display_surface,
+                           item_bbox=item_bbox,
+                           to_blit=text_surface_obj)
 
         return grid_as_char, target_indices, distractor_indices
