@@ -269,6 +269,8 @@ def make(root_output_dir,
     if not root_output_dir.is_dir():
         root_output_dir.mkdir(parents=True)
 
+    root_output_dir = root_output_dir.absolute()
+
     # for csv
     rows = []
 
