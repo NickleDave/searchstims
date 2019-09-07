@@ -4,9 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] 2019-09-07
+### Changed
+- both `searchstims.make` and `searchstims.utils.json_to_csv` function
+  save `root_output_dir` field in csv as absolute path
+
 ## [2.3.0] 2019-09-06
 ### Added
 - other `StimMaker` classes
+- `searchstims.util` module with `make_csv` and `json_to_csv` functions
+  + the `searchstims.make` function now calls `make_csv` after making
+    the images, see below
+  + the `json_to_csv` function is for converting the `.json` files that
+    used to be generated with metadata to the new `.csv` files
+    + it also generates individual `.meta.json` files for each image as
+      `searchstims.make` now does
 
 ### Changed
 - `searchstims.make` now outputs a .csv file instead of a .json file
