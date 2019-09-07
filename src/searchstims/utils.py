@@ -148,11 +148,14 @@ def json_to_csv(json_filename, root_output_dir):
     with open(json_filename) as fp:
         metadict = json.load(fp)
 
-    if not Path(root_output_dir).is_dir():
+    root_output_dir = Path(root_output_dir)
+    if not root_output_dir.is_dir():
         raise NotADirectoryError(
             "value for `root_output_dir` not recognized as a directory: "
             f"{root_output_dir}"
         )
+
+    root_output_dir = root_output_dir.absolute()
 
     rows = []
     for stimulus, stim_dict in metadict.items():
