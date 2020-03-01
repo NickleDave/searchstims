@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] 2020-02-29
+### Added
+- `background_color` argument to `AbstractStimMaker`
+  + makes it possible to specify background color of search stimuli
+    (e.g., white instead of default black)
+
 ## [2.3.1] 2019-09-07
 ### Changed
 - both `searchstims.make` and `searchstims.utils.json_to_csv` function
