@@ -23,7 +23,7 @@ __title__ = "searchstims"
 __summary__ = "Python package to make stimuli like those used in classic visual search experiments."
 __uri__ = "https://github.com/NickleDave/searchstims"
 
-__version__ = "2.3.1"
+__version__ = "2.4.0"
 
 if base_dir is not None and os.path.exists(os.path.join(base_dir, ".commit")):
     with open(os.path.join(base_dir, ".commit")) as fp:
