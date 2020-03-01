@@ -28,6 +28,23 @@ MAX_DRAWS_INNER = 1000
 MAX_DRAWS_OUTER = 100
 
 
+def validate_color(color):
+    if type(color) not in (str, tuple):
+        raise TypeError(
+            f'color must be a string or a three-element tuple corresponding to an RGB color but was: {type(color)}'
+        )
+
+    if type(color) == tuple:
+        if len(color) != 3:
+            raise ValueError(
+                f'color tuple must be a 3 element RGB color; number of elements was {len(color)}'
+            )
+        if not all([type(el) == int for el in color]):
+            raise ValueError(
+                f'all elements in color tuple should be of type int, color values were: {color}'
+            )
+
+
 class AbstractStimMaker:
     """parent class for all StimMaker classes
 
@@ -89,6 +106,7 @@ class AbstractStimMaker:
     def __init__(self,
                  target_color='red',
                  distractor_color='green',
+                 background_color='black',
                  window_size=(227, 227),
                  border_size=None,
                  grid_size=(5, 5),
@@ -100,9 +118,11 @@ class AbstractStimMaker:
         Parameters
         ----------
         target_color : str, tuple
-            {'red', 'green', 'white', 'blue'}. Default is 'red'.
+            One of {'red', 'green', 'blue', 'white', 'black'}. Default is 'red'.
         distractor_color : str, tuple
-            {'red', 'green', 'white', 'blue'}. Default is 'green'.
+            One of {'red', 'green', 'blue', 'white', 'black'}. Default is 'green'.
+        background_color : str, tuple
+            One of {'red', 'green', 'blue', 'white', 'black'}. Default is 'black'.
         window_size : tuple
             of length two, representing (height, width) of window in pixels.
         border_size : tuple
@@ -134,35 +154,12 @@ class AbstractStimMaker:
             if not all([grid_size_el > 0 for grid_size_el in grid_size]):
                 raise ValueError('values for grid size must be positive integers')
 
-        if type(target_color) not in (str, tuple):
-            raise TypeError('target_color must be a string or a three-element tuple corresponding to an RGB color')
-
-        if type(target_color) == tuple:
-            if len(target_color) != 3:
-                raise ValueError(
-                    f'target_color tuple must be a 3 element RGB color; number of elements was {len(target_color)}'
-                )
-            if not all([type(el) == int for el in target_color]):
-                raise ValueError(
-                    'all elements in target_color tuple should be of type int'
-                )
-
-        if type(distractor_color) not in (str, tuple):
-            raise TypeError('distractor_color must be a string or a three-element tuple corresponding to an RGB color')
-
-        if type(distractor_color) == tuple:
-            if len(distractor_color) != 3:
-                raise ValueError(
-                    'distractor_color tuple must be a 3 element RGB color; '
-                    f'number of elements was {len(distractor_color)}'
-                )
-            if not all([type(el) == int for el in distractor_color]):
-                raise ValueError(
-                    'all elements in distractor_color tuple should be of type int'
-                )
+        for color in [target_color, distractor_color, background_color]:
+            validate_color(color)
 
         self.target_color = target_color
         self.distractor_color = distractor_color
+        self.background_color = background_color
         self.grid_size = grid_size
         self.min_center_dist = min_center_dist
         self.window_size = window_size
@@ -457,7 +454,7 @@ class AbstractStimMaker:
                                                   32)
 
         # draw on surface object
-        display_surface.fill(colors_dict['black'])
+        display_surface.fill(colors_dict[self.background_color])
         target_inds = np.random.choice(np.arange(set_size),
                                        size=num_target).tolist()
 

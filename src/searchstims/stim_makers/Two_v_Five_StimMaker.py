@@ -15,16 +15,9 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
     forcedsquare_path = str(THIS_FILE_DIR.joinpath('..', 'ttf', 'forced_square.ttf'))
 
     def __init__(self,
-                 target_color='white',
-                 distractor_color='white',
-                 grid_size=(5, 5),
-                 min_center_dist=None,
-                 window_size=(227, 227),
-                 border_size=None,
-                 item_bbox_size=(30, 30),
-                 jitter=5,
                  target_number=2,
-                 distractor_number=5):
+                 distractor_number=5,
+                 **kwargs):
         """
         Other Parameters
         ----------------
@@ -35,14 +28,7 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
             Number that is used as a distractor.
             one of {2, 5}. Default is 5.
         """
-        super().__init__(target_color=target_color,
-                         distractor_color=distractor_color,
-                         window_size=window_size,
-                         border_size=border_size,
-                         grid_size=grid_size,
-                         min_center_dist=min_center_dist,
-                         item_bbox_size=item_bbox_size,
-                         jitter=jitter)
+        super().__init__(**kwargs)
         self.target_number = str(target_number)
         self.distractor_number = str(distractor_number)
 
