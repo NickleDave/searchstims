@@ -117,7 +117,7 @@ def main():
     stim_dict = _get_stim_dict(config)
     make(root_output_dir=config.general.output_dir,
          stim_dict=stim_dict,
-         json_filename=config.general.json_filename,
+         csv_filename=config.general.csv_filename,
          num_target_present=config.general.num_target_present,
          num_target_absent=config.general.num_target_absent,
          set_sizes=config.general.set_sizes)
