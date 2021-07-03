@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "searchstims"
+version = "2.4.0"
+description = "Python package to make stimuli like those used in classic visual search experiments."
+authors = ["David Nicholson <nickledave@users.noreply.github.com>"]
+license = "BSD"
+classifiers = [
+        'License :: OSI Approved :: BSD License',
+        'Development Status :: 5 - Production/Stable',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: Implementation :: CPython'
+]
+readme = 'README.md'
+homepage = 'https://github.com/NickleDave/searchstims'
+
+[tool.poetry.dependencies]
+python = ">3.7, <3.10"
+pygame = "^2.0.1"
+numpy = "^1.21.0"
+scipy = "^1.7.0"
+imageio = "^2.9.0"
+attrs = "^21.2.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+ipython = "^7.25.0"
+
+[tool.poetry.scripts]
+searchstims = 'searchstims.main:main'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
