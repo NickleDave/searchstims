@@ -20,7 +20,7 @@ class SearchStimulus(NamedTuple):
         """Convert string values in given dictionary
         to corresponding SearchStimulus field type.
         """
-        return {field: cls._field_types[field](value)
+        return {field: cls.__annotations__[field](value)
                 for field, value in row.items()}
 
 
