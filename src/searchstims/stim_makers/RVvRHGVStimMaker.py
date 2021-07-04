@@ -5,6 +5,7 @@ from pygame.rect import Rect
 
 from .abstract_stim_maker import AbstractStimMaker
 from .abstract_stim_maker import colors_dict
+from ..voc import VOCObject
 
 
 class RVvRHGVStimMaker(AbstractStimMaker):
@@ -51,6 +52,7 @@ class RVvRHGVStimMaker(AbstractStimMaker):
         distractor_orientation = list('V' * num_vert_rect + 'H' * num_horz_rect)
         random.shuffle(distractor_orientation)
 
+        voc_objects = []
         for item, (center_x, center_y) in enumerate(zip(xx_to_use_ctr, yy_to_use_ctr)):
             # notice we are now using PyGame order of sizes, (width, height)
             item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
@@ -64,14 +66,17 @@ class RVvRHGVStimMaker(AbstractStimMaker):
                 target_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 't'
+                voc_name = 't'
             else:
                 orientation = distractor_orientation.pop()
                 if orientation == 'V':
                     color = self.distractor_color
                     rotate = False
+                    voc_name = 'dV'
                 elif orientation == 'H':
                     color = self.target_color
                     rotate = True
+                    voc_name = 'dH'
 
                 distractor_indices.append(center)
                 if self.grid_size:
@@ -86,7 +91,15 @@ class RVvRHGVStimMaker(AbstractStimMaker):
                            color=color,
                            rotate=rotate)
 
-        return grid_as_char, target_indices, distractor_indices
+            voc_objects.append(
+                VOCObject(name=voc_name,
+                          xmin=item_bbox.left,
+                          xmax=item_bbox.right,
+                          ymin=item_bbox.bottom,
+                          ymax=item_bbox.top)
+            )
+
+        return grid_as_char, target_indices, distractor_indices, voc_objects
 
     def draw_item(self, display_surface, item_bbox, color, rotate):
         """Draws a vertical rectangle that is 1/3 the width of the item bounding box.

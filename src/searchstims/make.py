@@ -9,6 +9,7 @@ import pygame
 
 from .stim_makers import AbstractStimMaker
 from .utils import make_csv
+from .voc import Writer
 
 
 def _generate_xx_and_yy(set_size,
@@ -308,8 +309,10 @@ def make(root_output_dir,
                 if not target_condition_dir.is_dir():
                     target_condition_dir.mkdir()
 
-                def _make_stim(img_num, cells_to_use=None,
-                               xx_to_use_ctr=None, yy_to_use_ctr=None):
+                def _make_stim(img_num,
+                               cells_to_use=None,
+                               xx_to_use_ctr=None,
+                               yy_to_use_ctr=None):
                     """helper function to make and save individual stim
 
                     Define as a nested function so we can avoid repeating ourselves below
@@ -345,12 +348,35 @@ def make(root_output_dir,
                     with open(meta_file, 'w') as fp:
                         json.dump(meta_dict, fp)
 
+                    voc_writer = Writer(
+                        path=abs_path_filename,
+                        width=stim_maker.window_size[1],
+                        height=stim_maker.window_size[0],
+                    )
+                    for voc_object in rect_tuple.voc_objects:
+                        voc_writer.add_object(
+                            name=voc_object.name,
+                            xmin=voc_object.xmin,
+                            ymin=voc_object.ymin,
+                            xmax=voc_object.xmax,
+                            ymax=voc_object.ymax,
+                        )
+                    xml_filename = filename.replace('png', 'xml')
+                    voc_writer.save(
+                        annotation_path=target_condition_dir / xml_filename
+                    )
+                    # use relative path for name of file in csv, as above for img_file
+                    xml_file = Path(stimulus).joinpath(str(set_size),
+                                                       target_condition,
+                                                       xml_filename)
+
                     row = (stimulus,
                            set_size,
                            target_condition,
                            img_num,
                            root_output_dir,
                            img_file,
+                           xml_file,
                            meta_file)
                     rows.append(row)
 

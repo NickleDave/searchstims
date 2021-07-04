@@ -24,6 +24,7 @@ numpy = "^1.21.0"
 scipy = "^1.7.0"
 imageio = "^2.9.0"
 attrs = "^21.2.0"
+Jinja2 = "^3.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"

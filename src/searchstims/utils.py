@@ -13,6 +13,7 @@ class SearchStimulus(NamedTuple):
     img_num: int
     root_output_dir: str
     img_file: str
+    xml_file: str
     meta_file: str
 
     @classmethod
