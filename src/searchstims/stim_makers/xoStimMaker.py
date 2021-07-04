@@ -6,6 +6,7 @@ from pygame.rect import Rect
 
 from .abstract_stim_maker import AbstractStimMaker
 from .abstract_stim_maker import colors_dict
+from ..voc import VOCObject
 
 THIS_FILE_DIR = Path(__file__).parent
 
@@ -71,6 +72,7 @@ class xoStimMaker(AbstractStimMaker):
         distractor_letters = list('x' * num_distractor_x + 'o' * num_distractor_o)
         random.shuffle(distractor_letters)
 
+        voc_objects = []
         for item, (center_x, center_y) in enumerate(zip(xx_to_use_ctr, yy_to_use_ctr)):
             # notice we are now using PyGame order of sizes, (width, height)
             item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
@@ -84,16 +86,20 @@ class xoStimMaker(AbstractStimMaker):
                 target_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 't'
+                voc_name = 't'
             else:
                 is_target = False
                 distractor_letter = distractor_letters.pop()
                 if distractor_letter == 'x':
                     color = self.distractor_x_color
+                    voc_name = 'dx'
                 elif distractor_letter == 'o':
                     color = self.distractor_o_color
+                    voc_name = 'do'
                 distractor_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = distractor_letter
+
 
             if type(color) == str:
                 color = colors_dict[color]
@@ -110,7 +116,15 @@ class xoStimMaker(AbstractStimMaker):
                            item_bbox=item_bbox,
                            to_blit=text_surface_obj)
 
-        return grid_as_char, target_indices, distractor_indices
+            voc_objects.append(
+                VOCObject(name=name,
+                          xmin=item_bbox.left,
+                          xmax=item_bbox.right,
+                          ymin=item_bbox.bottom,
+                          ymax=item_bbox.top)
+            )
+
+        return grid_as_char, target_indices, distractor_indices, voc_objects
 
     def draw_item(self, display_surface, item_bbox, to_blit):
         """Returns target or distractor"""

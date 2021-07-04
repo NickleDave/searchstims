@@ -5,6 +5,8 @@ from pygame.locals import *
 import numpy as np
 from scipy.spatial.distance import pdist
 
+from ..voc import VOCObject
+
 pygame.init()
 
 # set up colors
@@ -101,7 +103,8 @@ class AbstractStimMaker:
     RectTuple = namedtuple('RectTuple', ['display_surface',
                                          'grid_as_char',
                                          'target_indices',
-                                         'distractor_indices'])
+                                         'distractor_indices',
+                                         'voc_objects'])
 
     def __init__(self,
                  target_color='red',
@@ -227,6 +230,7 @@ class AbstractStimMaker:
         else:
             grid_as_char = None
 
+        voc_objects = []
         for item, (center_x, center_y) in enumerate(zip(xx_to_use_ctr, yy_to_use_ctr)):
             # notice we are now using PyGame order of sizes, (width, height)
             item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
@@ -237,13 +241,14 @@ class AbstractStimMaker:
             if item in target_inds:
                 color = self.target_color
                 target_indices.append(center)
-                if self.grid_size:
-                    grid_as_char[cells_to_use[item]] = 't'
+                voc_name = 't'
             else:
                 color = self.distractor_color
                 distractor_indices.append(center)
-                if self.grid_size:
-                    grid_as_char[cells_to_use[item]] = 'd'
+                voc_name = 'd'
+
+            if self.grid_size:
+                grid_as_char[cells_to_use[item]] = voc_name
 
             if type(color) == str:
                 color = colors_dict[color]
@@ -252,7 +257,15 @@ class AbstractStimMaker:
                            item_bbox=item_bbox,
                            color=color)
 
-        return grid_as_char, target_indices, distractor_indices
+            voc_objects.append(
+                VOCObject(name=voc_name,
+                          xmin=item_bbox.left,
+                          xmax=item_bbox.right,
+                          ymin=item_bbox.bottom,
+                          ymax=item_bbox.top)
+            )
+
+        return grid_as_char, target_indices, distractor_indices, voc_objects
 
     def make_stim(self,
                   set_size=8,
@@ -462,11 +475,12 @@ class AbstractStimMaker:
         # (added so that sub-classes can override just that function if they need to)
         (grid_as_char,
          target_indices,
-         distractor_indices) = self._make_stim(xx_to_use_ctr,
-                                               yy_to_use_ctr,
-                                               target_inds,
-                                               cells_to_use,
-                                               display_surface)
+         distractor_indices,
+         voc_objects) = self._make_stim(xx_to_use_ctr,
+                                        yy_to_use_ctr,
+                                        target_inds,
+                                        cells_to_use,
+                                        display_surface)
 
         if self.grid_size:
             grid_as_char = np.asarray(grid_as_char).reshape(self.grid_size[0], self.grid_size[1]).tolist()
@@ -475,6 +489,7 @@ class AbstractStimMaker:
         return self.RectTuple(display_surface=display_surface,
                               grid_as_char=grid_as_char,
                               target_indices=target_indices,
-                              distractor_indices=distractor_indices)
+                              distractor_indices=distractor_indices,
+                              voc_objects=voc_objects)
 
 

@@ -2,11 +2,12 @@
 test make module
 """
 import csv
+from glob import glob
 import os
+from pathlib import Path
 import tempfile
 import shutil
 import unittest
-from glob import glob
 
 import imageio
 import numpy as np
@@ -31,10 +32,9 @@ class TestMake(unittest.TestCase):
     def _dirs_got_made(self, config, stim_type):
         for set_size in config.general.set_sizes:
             for target in ('present', 'absent'):
-                dir_that_should_exist = os.path.join(
-                    self.tmp_output_dir, stim_type, str(set_size), target
-                )
-                self.assertTrue(os.path.isdir(dir_that_should_exist))
+                dir_that_should_exist = Path(self.tmp_output_dir) / stim_type / str(set_size) / target
+                self.assertTrue(dir_that_should_exist.exists())
+                self.assertTrue(dir_that_should_exist.is_dir())
         return True
 
     def _files_got_made(self, config, stim_type):
@@ -44,16 +44,15 @@ class TestMake(unittest.TestCase):
                     nums = range(config.general.num_target_present // len(config.general.set_sizes))
                 elif target == 'absent':
                     nums = range(config.general.num_target_absent // len(config.general.set_sizes))
+                parent = Path(self.tmp_output_dir) / stim_type / str(set_size) / target
                 for num in nums:
-                    filename = f'{stim_type}_set_size_{set_size}_target_{target}_{num}.png'
-                    # use absolute path to save
-                    file_that_should_exist = os.path.join(self.tmp_output_dir,
-                                                          stim_type,
-                                                          str(set_size),
-                                                          target,
-                                                          filename)
-
-                    self.assertTrue(os.path.isfile(file_that_should_exist))
+                    stem = f'{stim_type}_set_size_{set_size}_target_{target}_{num}'
+                    for ext in ('png', 'meta.json', 'xml'):
+                        filename = f'{stem}.{ext}'
+                        # use absolute path to save
+                        file_that_should_exist = parent / filename
+                        self.assertTrue(file_that_should_exist.exists())
+                        self.assertTrue(os.path.isfile(file_that_should_exist))
         return True
 
     def _files_got_made_num_target_present_absent_list(self, config, stim_type,
@@ -65,16 +64,15 @@ class TestMake(unittest.TestCase):
                     nums = range(num_imgs_present)
                 elif target == 'absent':
                     nums = range(num_imgs_absent)
+                parent = Path(self.tmp_output_dir) / stim_type / str(set_size) / target
                 for num in nums:
-                    filename = f'{stim_type}_set_size_{set_size}_target_{target}_{num}.png'
-                    # use absolute path to save
-                    file_that_should_exist = os.path.join(self.tmp_output_dir,
-                                                          stim_type,
-                                                          str(set_size),
-                                                          target,
-                                                          filename)
-
-                    self.assertTrue(os.path.isfile(file_that_should_exist))
+                    stem = f'{stim_type}_set_size_{set_size}_target_{target}_{num}'
+                    for ext in ('png', 'meta.json', 'xml'):
+                        filename = f'{stem}.{ext}'
+                        # use absolute path to save
+                        file_that_should_exist = parent / filename
+                        self.assertTrue(file_that_should_exist.exists())
+                        self.assertTrue(os.path.isfile(file_that_should_exist))
         return True
 
     def test_make_RVvGV(self):

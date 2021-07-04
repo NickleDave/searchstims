@@ -40,13 +40,16 @@ class TestUtils(unittest.TestCase):
                             f'{stimulus}_set_size_{set_size}_target_{target_condition}'
                             f'_{img_num}.png'
                         )
+                        xml_file = img_file.replace('png', 'xml')
                         meta_file = img_file.replace('png', 'meta.json')
+
                         row = [stimulus,
                                set_size,
                                target_condition,
                                img_num,
                                root_output_dir,
                                img_file,
+                               xml_file,
                                meta_file]
                         rows.append(row)
 
@@ -69,11 +72,13 @@ class TestUtils(unittest.TestCase):
                         )
                     elif key == 'root_output_dir':
                         self.assertTrue(val == root_output_dir)
-                    elif key == 'img_file' or key == 'meta_file':
+                    elif key == 'img_file' or key == 'xml_file' or key == 'meta_file':
                         stem = (f"{row['stimulus']}_set_size_{row['set_size']}_target_"
                                 f"{row['target_condition']}_{row['img_num']}")
                         if key == 'img_file':
                             self.assertTrue(val == stem + '.png')
+                        elif key == 'xml_file':
+                            self.assertTrue(val == stem + '.xml')
                         elif key == 'meta_file':
                             self.assertTrue(val == stem + '.meta.json')
             expected_num_rows = len(img_nums) * len(to_csv['stimulus']) * \

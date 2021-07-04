@@ -5,6 +5,7 @@ from pygame.rect import Rect
 
 from .abstract_stim_maker import AbstractStimMaker
 from .abstract_stim_maker import colors_dict
+from ..voc import VOCObject
 
 THIS_FILE_DIR = Path(__file__).parent
 
@@ -52,6 +53,7 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
         else:
             grid_as_char = None
 
+        voc_objects = []
         for item, (center_x, center_y) in enumerate(zip(xx_to_use_ctr, yy_to_use_ctr)):
             # notice we are now using PyGame order of sizes, (width, height)
             item_bbox_tuple = (0, 0) + (self.item_bbox_size[1], self.item_bbox_size[0])
@@ -65,12 +67,14 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
                 target_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 't'
+                name = 't'
             else:
                 is_target = False
                 color = self.distractor_color
                 distractor_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 'd'
+                name = 'd'
 
             if type(color) == str:
                 color = colors_dict[color]
@@ -90,4 +94,12 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
                            item_bbox=item_bbox,
                            to_blit=text_surface_obj)
 
-        return grid_as_char, target_indices, distractor_indices
+            voc_objects.append(
+                VOCObject(name=name,
+                          xmin=item_bbox.left,
+                          xmax=item_bbox.right,
+                          ymin=item_bbox.bottom,
+                          ymax=item_bbox.top)
+            )
+
+        return grid_as_char, target_indices, distractor_indices, voc_objects
