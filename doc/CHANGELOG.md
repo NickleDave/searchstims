@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `make` function now saves Pascal VOC annotation file for each search display image 
+  [#20](https://github.com/NickleDave/searchstims/pull/20)
+
 ### Fixed
 - fix arguments that `main` passes to `make` so that command-line interface works
   [#19](https://github.com/NickleDave/searchstims/pull/19)
