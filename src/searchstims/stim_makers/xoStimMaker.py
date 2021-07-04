@@ -100,7 +100,6 @@ class xoStimMaker(AbstractStimMaker):
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = distractor_letter
 
-
             if type(color) == str:
                 color = colors_dict[color]
 
@@ -117,7 +116,7 @@ class xoStimMaker(AbstractStimMaker):
                            to_blit=text_surface_obj)
 
             voc_objects.append(
-                VOCObject(name=name,
+                VOCObject(name=voc_name,
                           xmin=item_bbox.left,
                           xmax=item_bbox.right,
                           ymin=item_bbox.bottom,
