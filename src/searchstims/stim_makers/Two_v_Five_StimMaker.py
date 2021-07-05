@@ -67,14 +67,14 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
                 target_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 't'
-                name = 't'
+                voc_name = 't'
             else:
                 is_target = False
                 color = self.distractor_color
                 distractor_indices.append(center)
                 if self.grid_size:
                     grid_as_char[cells_to_use[item]] = 'd'
-                name = 'd'
+                voc_name = 'd'
 
             if type(color) == str:
                 color = colors_dict[color]
@@ -95,11 +95,7 @@ class Two_v_Five_StimMaker(AbstractStimMaker):
                            to_blit=text_surface_obj)
 
             voc_objects.append(
-                VOCObject(name=name,
-                          xmin=item_bbox.left,
-                          xmax=item_bbox.right,
-                          ymin=item_bbox.bottom,
-                          ymax=item_bbox.top)
+                VOCObject.from_rect(rect=item_bbox, voc_name=voc_name)
             )
 
         return grid_as_char, target_indices, distractor_indices, voc_objects

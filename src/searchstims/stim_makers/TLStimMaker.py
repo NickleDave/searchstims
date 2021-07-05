@@ -136,11 +136,7 @@ class TLStimMaker(AbstractStimMaker):
                            to_blit=text_surface_obj)
 
             voc_objects.append(
-                VOCObject(name=voc_name,
-                          xmin=item_bbox.left,
-                          xmax=item_bbox.right,
-                          ymin=item_bbox.bottom,
-                          ymax=item_bbox.top)
+                VOCObject.from_rect(rect=item_bbox, voc_name=voc_name)
             )
 
         return grid_as_char, target_indices, distractor_indices, voc_objects
