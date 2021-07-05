@@ -11,3 +11,13 @@ class VOCObject(NamedTuple):
     xmax: int
     ymin: int
     ymax: int
+
+    @classmethod
+    def from_rect(cls, rect, voc_name):
+        """create a ``VOCObject`` instance
+        from a ``pygame.Rect``. """
+        return cls(name=voc_name,
+                   xmin=rect.left,
+                   xmax=rect.right,
+                   ymin=rect.top,
+                   ymax=rect.bottom)
